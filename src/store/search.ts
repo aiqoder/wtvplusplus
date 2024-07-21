@@ -3,7 +3,7 @@ import { useLocalStorage } from '@vueuse/core';
 
 export const useSearch = defineStore("search", {
   state: () => ({
-    url: useLocalStorage("search-url", ""),
+    url: "https://jhsaj21.xxxsssttt.cyou/search-free-json/nbplus",
     activeCode: useLocalStorage("active-code", "")
   }),
   getters: {

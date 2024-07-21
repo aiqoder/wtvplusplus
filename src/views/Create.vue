@@ -7,21 +7,17 @@
     </n-p>
     <n-h3> 联系方式 </n-h3>
     <n-tabs type="segment">
+      <n-tab-pane name="chap2" tab="捐赠">
+        <div style="text-align: center;">
+          <p>
+            12元钱，请我吃臊子面
+          </p>
+          <img src="../assets/电视直播交流群群聊二维码.png" style="background-color: #f0f0f0;padding-top:20px" />
+        </div>
+      </n-tab-pane>
       <n-tab-pane name="chap1" tab="公众号（一个橙子pro）">
         <div style="text-align: center;">
           <img src="../assets/wxgzh.png" style="width: 70vw" />
-        </div>
-      </n-tab-pane>
-      <n-tab-pane name="chap2" tab="QQ群">
-        <div style="text-align: center;">
-          <p>
-          Q兴趣群：740442537,点击链接加入群聊【电视直播交流群】：<a
-            target="_blank"
-            href="https://jq.qq.com/?_wv=1027&k=AsDsfY4j"
-            >https://jq.qq.com/?_wv=1027&k=AsDsfY4j</a
-          >
-        </p>
-        <img src="../assets/电视直播交流群群聊二维码.png" style="background-color: #f0f0f0;padding-top:20px"/>
         </div>
       </n-tab-pane>
       <n-tab-pane name="chap4" tab="微信">
@@ -32,7 +28,7 @@
       </n-tab-pane>
       <n-tab-pane name="chap5" tab="捐赠" v-if="isMac()">
         <div style="text-align:center">
-          <img width="260" src="../assets/408eedad9e3dddf953884793c99727a.jpg"/>
+          <img width="260" src="../assets/408eedad9e3dddf953884793c99727a.jpg" />
         </div>
       </n-tab-pane>
     </n-tabs>
