@@ -1,9 +1,9 @@
 {
   "name": "electron-vue-vite",
-  "version": "28.1.0",
-  "main": "dist-electron/main/index.js",
-  "description": "Really simple Electron + Vue + Vite boilerplate.",
-  "author": "草鞋没号 <308487730@qq.com>",
+  "version": "1.1.0",
+  "main": "dist/main/index.cjs",
+  "description": "wtv 工具箱",
+  "author": "一个橙子pro <942242856@qq.com>",
   "license": "MIT",
   "private": true,
   "keywords": [
@@ -15,24 +15,52 @@
   ],
   "debug": {
     "env": {
-      "VITE_DEV_SERVER_URL": "http://127.0.0.1:3344/"
+      "VITE_DEV_SERVER_URL": "http://127.0.0.1:3344/",
+      "VSCODE_DEBUG": true
     }
   },
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "chcp 65001 && node scripts/watch.mjs",
     "build": "vue-tsc --noEmit && vite build && electron-builder",
     "preview": "vite preview"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.0.4",
-    "electron": "^29.1.1",
-    "electron-builder": "^24.13.3",
+    "electron": "^22.0.0",
+    "electron-builder": "^22.14.13",
+    "electron-store": "^8.1.0",
+    "rollup-plugin-node-polyfills": "^0.2.1",
+    "sass": "^1.77.8",
     "typescript": "^5.4.2",
-    "vite": "^5.1.5",
-    "vite-plugin-electron": "^0.28.4",
+    "unocss": "^0.61.5",
+    "unplugin-auto-import": "^0.18.0",
+    "unplugin-vue-components": "^0.27.3",
+    "vite": "^5.0.12",
+    "vite-plugin-electron": "^0.15.6",
     "vite-plugin-electron-renderer": "^0.14.5",
+    "vite-plugin-html": "^3.2.2",
+    "vite-plugin-resolve": "^2.5.1",
+    "vite-plugin-static-copy": "^1.0.6",
     "vue": "^3.4.21",
     "vue-tsc": "^2.0.6"
+  },
+  "dependencies": {
+    "@vicons/ionicons5": "^0.12.0",
+    "@vueuse/core": "^10.11.0",
+    "axios": "^1.7.2",
+    "chardet": "^2.0.0",
+    "crypto-js": "^4.2.0",
+    "dayjs": "^1.11.12",
+    "express": "^4.19.2",
+    "howtools": "^0.2.4",
+    "iconv-lite": "^0.6.3",
+    "iptv-playlist-parser": "^0.13.0",
+    "mitt": "^3.0.1",
+    "naive-ui": "^2.39.0",
+    "pinia": "^2.1.7",
+    "vue-loading-overlay": "^6.0.4",
+    "vue-router": "^4.4.0",
+    "vue3-contextmenu": "^0.2.12"
   }
 }

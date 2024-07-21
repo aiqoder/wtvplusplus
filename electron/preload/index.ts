@@ -1,118 +1,79 @@
-import { ipcRenderer, contextBridge } from 'electron'
+import { clipboard, contextBridge, ipcRenderer, screen } from "electron";
+import { shell } from "electron"
+import { getPcInfo } from "./utils";
+import { getVideoInfo, getVersion, killPid, killAll, playVideo, killVideo } from './ffmpeg';
+import { MyBrowserWindow } from "../main/newWindow";
+// import { createFileServer } from './fileServer';
+import { getIp } from "./ip";
+import { EXEUTE_IS_RUNNING_PROCESS, EXEUTE_PROCESS, GET_CURSOR_SCREEN_POINT, GET_PRINTER_LIST_EVENT, GET_STORE_EVENT, KILL_EXEUTE_PROCESS, SET_STORE_EVENT, USER_HOME_PATH_EVENT } from "../main/const"
 
-// --------- Expose some API to the Renderer process ---------
-contextBridge.exposeInMainWorld('ipcRenderer', {
-  on(...args: Parameters<typeof ipcRenderer.on>) {
-    const [channel, listener] = args
-    return ipcRenderer.on(channel, (event, ...args) => listener(event, ...args))
-  },
-  off(...args: Parameters<typeof ipcRenderer.off>) {
-    const [channel, ...omit] = args
-    return ipcRenderer.off(channel, ...omit)
-  },
-  send(...args: Parameters<typeof ipcRenderer.send>) {
-    const [channel, ...omit] = args
-    return ipcRenderer.send(channel, ...omit)
-  },
-  invoke(...args: Parameters<typeof ipcRenderer.invoke>) {
-    const [channel, ...omit] = args
-    return ipcRenderer.invoke(channel, ...omit)
-  },
+contextBridge.exposeInMainWorld("eApi", {
+    ipcRenderer: ipcRenderer,
+    setTitle: (title: string) => ipcRenderer.send("set-title", title),
+    // 读取剪贴板
+    getClipboardText: () => clipboard.readText("clipboard"),
+    writeClipboardText: (text: string) => clipboard.writeText(text),
+    createWindow: (config: MyBrowserWindow) => ipcRenderer.send("create-window", config),
+    removeWindow: (appName: string) => ipcRenderer.send("remove-window", appName),
+    readFileDialogAsText: (appName: string, extensions?: string[]) => ipcRenderer.invoke("chengzi-load-dialog-file", appName, extensions),
+    readFileAsText: (path: string) => ipcRenderer.invoke("chengzi-load-file", path),
+    writeFileAsText: (path: string, data: any) => ipcRenderer.invoke("chengzi-write-file", path, data),
+    upgrade: () => ipcRenderer.send("upgrade"),
+    localIp: getIp(),
+    openUrl: shell.openExternal,
+    getPrintersAsync: () => ipcRenderer.invoke(GET_PRINTER_LIST_EVENT),
+    getCursorScreenPoint: () => ipcRenderer.invoke(GET_CURSOR_SCREEN_POINT),
+});
 
-  // You can expose other APTs you need here.
-  // ...
+
+// 版本控制
+contextBridge.exposeInMainWorld("version", {
+    // 版本更新通知
+    onVersionUpdate: (callback: (type: "update-available" | "download-progress" | "update-downloaded" | "update-not-available", message: any) => void) => {
+        ipcRenderer.on("message", (event, arg) => {
+            callback(arg.cmd, arg.message)
+        });
+    },
+    // 下载最新版本
+    downLoadLastVersion() {
+        ipcRenderer.send("downloadUpdate")
+    },
+    // 检查最新版本
+    checkForUpdate() {
+        ipcRenderer.send("checkForUpdate")
+    }
 })
 
-// --------- Preload scripts loading ---------
-function domReady(condition: DocumentReadyState[] = ['complete', 'interactive']) {
-  return new Promise((resolve) => {
-    if (condition.includes(document.readyState)) {
-      resolve(true)
-    } else {
-      document.addEventListener('readystatechange', () => {
-        if (condition.includes(document.readyState)) {
-          resolve(true)
-        }
-      })
+
+// 标题栏控制
+contextBridge.exposeInMainWorld("titleBar", {
+    winControl(control: "win-close" | "win-min" | "win-max" | "win-unmax") {
+        ipcRenderer.send(control)
     }
-  })
-}
+})
 
-const safeDOM = {
-  append(parent: HTMLElement, child: HTMLElement) {
-    if (!Array.from(parent.children).find(e => e === child)) {
-      return parent.appendChild(child)
-    }
-  },
-  remove(parent: HTMLElement, child: HTMLElement) {
-    if (Array.from(parent.children).find(e => e === child)) {
-      return parent.removeChild(child)
-    }
-  },
-}
+contextBridge.exposeInMainWorld("eUtils", {
+    getPcInfo,
+    // 创建文件服务器
+    // createFileServer,
+    closePorcess: (args) => ipcRenderer.invoke(KILL_EXEUTE_PROCESS, args),
+    execPorcess: (args) => ipcRenderer.invoke(EXEUTE_PROCESS, args),
+    processIsRunning: (args) => ipcRenderer.invoke(EXEUTE_IS_RUNNING_PROCESS, args),
+    getPath: (args: string, clear = false) => ipcRenderer.invoke(USER_HOME_PATH_EVENT, args, clear) as unknown as string,
+    // 存储
+    getStore: (key: string) => ipcRenderer.invoke(GET_STORE_EVENT, key) as unknown as any,
+    setStore: (key: string, value: any) => ipcRenderer.invoke(SET_STORE_EVENT, key, value),
+})
 
-/**
- * https://tobiasahlin.com/spinkit
- * https://connoratherton.com/loaders
- * https://projects.lukehaas.me/css-loaders
- * https://matejkustec.github.io/SpinThatShit
- */
-function useLoading() {
-  const className = `loaders-css__square-spin`
-  const styleContent = `
-@keyframes square-spin {
-  25% { transform: perspective(100px) rotateX(180deg) rotateY(0); }
-  50% { transform: perspective(100px) rotateX(180deg) rotateY(180deg); }
-  75% { transform: perspective(100px) rotateX(0) rotateY(180deg); }
-  100% { transform: perspective(100px) rotateX(0) rotateY(0); }
-}
-.${className} > div {
-  animation-fill-mode: both;
-  width: 50px;
-  height: 50px;
-  background: #fff;
-  animation: square-spin 3s 0s cubic-bezier(0.09, 0.57, 0.49, 0.9) infinite;
-}
-.app-loading-wrap {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #282c34;
-  z-index: 9;
-}
-    `
-  const oStyle = document.createElement('style')
-  const oDiv = document.createElement('div')
+contextBridge.exposeInMainWorld("ffmpeg", {
+    getVideoInfo,
+    getVersion,
+    killAll,
+    killPid,
+    killVideo,
+    playVideo,
+})
 
-  oStyle.id = 'app-loading-style'
-  oStyle.innerHTML = styleContent
-  oDiv.className = 'app-loading-wrap'
-  oDiv.innerHTML = `<div class="${className}"><div></div></div>`
-
-  return {
-    appendLoading() {
-      safeDOM.append(document.head, oStyle)
-      safeDOM.append(document.body, oDiv)
-    },
-    removeLoading() {
-      safeDOM.remove(document.head, oStyle)
-      safeDOM.remove(document.body, oDiv)
-    },
-  }
-}
-
-// ----------------------------------------------------------------------
-
-const { appendLoading, removeLoading } = useLoading()
-domReady().then(appendLoading)
-
-window.onmessage = (ev) => {
-  ev.data.payload === 'removeLoading' && removeLoading()
-}
-
-setTimeout(removeLoading, 4999)
+contextBridge.exposeInMainWorld("fileshare", {
+    openDirectory: () => ipcRenderer.invoke("chengzi-wtv-read-directory"),
+})

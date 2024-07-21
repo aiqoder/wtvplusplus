@@ -1,35 +1,21 @@
-import { app, BrowserWindow, shell, ipcMain } from 'electron'
-import { createRequire } from 'node:module'
-import { fileURLToPath } from 'node:url'
-import path from 'node:path'
-import os from 'node:os'
 
-const require = createRequire(import.meta.url)
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
+import { app, BrowserWindow, globalShortcut, shell, screen, nativeTheme } from 'electron'
+import { join, dirname } from 'path'
+import { setHeaders } from './headers'
+import "./newWindow"
+import "./newDialog"
+import "./ip"
+import "./event"
+import "./fileshare/openDir"
+import menu from "./menu"
+import { startedApps } from './newWindow';
+import os from 'os'
 
-// The built directory structure
-//
-// ├─┬ dist-electron
-// │ ├─┬ main
-// │ │ └── index.js    > Electron-Main
-// │ └─┬ preload
-// │   └── index.mjs   > Preload-Scripts
-// ├─┬ dist
-// │ └── index.html    > Electron-Renderer
-//
-process.env.APP_ROOT = path.join(__dirname, '../..')
+// 禁用http 缓存
+app.commandLine.appendSwitch("--disable-http-cache");
 
-export const MAIN_DIST = path.join(process.env.APP_ROOT, 'dist-electron')
-export const RENDERER_DIST = path.join(process.env.APP_ROOT, 'dist')
-export const VITE_DEV_SERVER_URL = process.env.VITE_DEV_SERVER_URL
-
-process.env.VITE_PUBLIC = VITE_DEV_SERVER_URL
-  ? path.join(process.env.APP_ROOT, 'public')
-  : RENDERER_DIST
-
-// Disable GPU Acceleration for Windows 7
-if (os.release().startsWith('6.1')) app.disableHardwareAcceleration()
-
+// 禁用硬件加速
+app.disableHardwareAcceleration()
 // Set application name for Windows 10+ notifications
 if (process.platform === 'win32') app.setAppUserModelId(app.getName())
 
@@ -37,52 +23,81 @@ if (!app.requestSingleInstanceLock()) {
   app.quit()
   process.exit(0)
 }
+process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true'
 
-let win: BrowserWindow | null = null
-const preload = path.join(__dirname, '../preload/index.mjs')
-const indexHtml = path.join(RENDERER_DIST, 'index.html')
+// Disable GPU Acceleration for Windows 7
+if (os.release().startsWith('6.1')) app.disableHardwareAcceleration()
+
+// Set application name for Windows 10+ notifications
+if (process.platform === 'win32') app.setAppUserModelId(app.getName())
+
+export let win: BrowserWindow | null = null
 
 async function createWindow() {
   win = new BrowserWindow({
-    title: 'Main window',
-    icon: path.join(process.env.VITE_PUBLIC, 'favicon.ico'),
+    title: '一个橙子pro工具箱',
+    show: false,
+    width: 1240,
+    height: 700,
+    minWidth: 375,
+    minHeight: 650,
+    maxWidth: 1920,
+    maxHeight: screen.getPrimaryDisplay().size.height,
+    // x: screen.getPrimaryDisplay().size.width - 385,
+    // y: (screen.getPrimaryDisplay().size.height - 650) / 2,
     webPreferences: {
-      preload,
-      // Warning: Enable nodeIntegration and disable contextIsolation is not secure in production
-      // nodeIntegration: true,
-
-      // Consider using contextBridge.exposeInMainWorld
-      // Read more on https://www.electronjs.org/docs/latest/tutorial/context-isolation
-      // contextIsolation: false,
+      preload: join(__dirname, '../preload/index.cjs'),
+      nodeIntegration: true,
+      contextIsolation: true,
+      webSecurity: false,
     },
+    // backgroundColor: "#18181c",
+    titleBarStyle: 'default',
+    darkTheme: true,
+    backgroundColor: '#18181c',
+    // maximizable: false,
   })
 
-  if (VITE_DEV_SERVER_URL) { // #298
-    win.loadURL(VITE_DEV_SERVER_URL)
-    // Open devTool if the app is not packaged
-    win.webContents.openDevTools()
+  nativeTheme.themeSource = 'dark'
+
+  if (app.isPackaged) {
+    win.setMenu(menu)
+    win.loadFile(join(__dirname, '../rendererMain/index.html'))
+
   } else {
-    win.loadFile(indexHtml)
+    win.loadURL("http://127.0.0.1:3344")
   }
 
-  // Test actively push message to the Electron-Renderer
-  win.webContents.on('did-finish-load', () => {
-    win?.webContents.send('main-process-message', new Date().toLocaleString())
-  })
 
   // Make all links open with the browser, not with the application
   win.webContents.setWindowOpenHandler(({ url }) => {
     if (url.startsWith('https:')) shell.openExternal(url)
     return { action: 'deny' }
   })
-  // win.webContents.on('will-navigate', (event, url) => { }) #344
+
+  // 主窗口关闭，关闭所有子窗口
+  win.once("close", () => {
+    for (const [key, win] of Object.entries(startedApps)) {
+      win.destroy()
+    }
+  })
+
+  return win
 }
 
-app.whenReady().then(createWindow)
+app.whenReady().then(()=>{
+  createWindow()
+  win?.show()
+  setHeaders()
+})
+
+app.on('will-quit', () => {
+  globalShortcut.unregisterAll();
+})
 
 app.on('window-all-closed', () => {
   win = null
-  if (process.platform !== 'darwin') app.quit()
+  app.quit()
 })
 
 app.on('second-instance', () => {
@@ -99,22 +114,5 @@ app.on('activate', () => {
     allWindows[0].focus()
   } else {
     createWindow()
-  }
-})
-
-// New window example arg: new windows url
-ipcMain.handle('open-win', (_, arg) => {
-  const childWindow = new BrowserWindow({
-    webPreferences: {
-      preload,
-      nodeIntegration: true,
-      contextIsolation: false,
-    },
-  })
-
-  if (VITE_DEV_SERVER_URL) {
-    childWindow.loadURL(`${VITE_DEV_SERVER_URL}#${arg}`)
-  } else {
-    childWindow.loadFile(indexHtml, { hash: arg })
   }
 })

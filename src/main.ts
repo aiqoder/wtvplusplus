@@ -1,14 +1,25 @@
 import { createApp } from 'vue'
 import App from './App.vue'
+import './index.scss'
+import 'virtual:uno.css'
+import router from './router'
+import { createPinia } from 'pinia'
+// import NaiveUI from 'naive-ui'
+import Directive from "./directive"
+//@ts-ignore
+import contextmenu from 'vue3-contextmenu'
 
-import './style.css'
+// eventbus
+import emitter from './utils/eventbus'
 
-import './demos/ipc'
-// If you want use Node.js, the`nodeIntegration` needs to be enabled in the Main process.
-// import './demos/node'
+const app = createApp(App)
 
-createApp(App)
-  .mount('#app')
-  .$nextTick(() => {
-    postMessage({ payload: 'removeLoading' }, '*')
-  })
+// EVENT BUS
+app.config.globalProperties.$bus = emitter
+// import 'vue3-contextmenu/dist/vue3-contextmenu.css' // 右键需要导入的样式
+app.use(contextmenu)// 右键
+app.use(router)
+// app.use(NaiveUI)
+app.use(Directive)
+app.use(createPinia())
+app.mount('#app')
