@@ -14,12 +14,13 @@
       "DOM"
     ],
     "skipLibCheck": true,
-    "noEmit": true
-  },
-  "paths": {
-    "@/*": [
-      "src/*",
-    ],
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "src/*",
+      ],
+    },
   },
   "include": [
     "src",
