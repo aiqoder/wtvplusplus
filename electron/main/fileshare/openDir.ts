@@ -1,13 +1,12 @@
 import { ipcMain, dialog } from "electron"
-import { startedApps } from "../newWindow"
 // 选择文件夹
-function readDirectoryDialog(appName: string, extensions = []) {
+function readDirectoryDialog(extensions = []) {
     return new Promise((reslove, reject) => {
-        dialog.showOpenDialog(startedApps[appName], {
+        dialog.showOpenDialog({
             title: " 🍊请选择文件，公众号：一个橙子pro  🍊",
             buttonLabel: "选好了就点这里吧",
             properties: ['openDirectory'],
-            filters: [ 
+            filters: [
                 { name: '源文件', extensions },
             ]
         }).then(({ canceled, filePaths }) => {
@@ -21,10 +20,10 @@ function readDirectoryDialog(appName: string, extensions = []) {
     })
 }
 
-ipcMain.handle("chengzi-wtv-read-directory", (ev, appName, extensions) => {
+ipcMain.handle("chengzi-wtv-read-directory", (ev, extensions) => {
     if (extensions) {
-        return readDirectoryDialog(appName, extensions)
+        return readDirectoryDialog(extensions)
     } else {
-        return readDirectoryDialog(appName)
+        return readDirectoryDialog()
     }
 })

@@ -2,10 +2,8 @@ import { clipboard, contextBridge, ipcRenderer, screen } from "electron";
 import { shell } from "electron"
 import { getPcInfo } from "./utils";
 import { getVideoInfo, getVersion, killPid, killAll, playVideo, killVideo } from './ffmpeg';
-import { MyBrowserWindow } from "../main/newWindow";
-// import { createFileServer } from './fileServer';
 import { getIp } from "./ip";
-import { EXEUTE_IS_RUNNING_PROCESS, EXEUTE_PROCESS, GET_CURSOR_SCREEN_POINT, GET_PRINTER_LIST_EVENT, GET_STORE_EVENT, KILL_EXEUTE_PROCESS, SET_STORE_EVENT, USER_HOME_PATH_EVENT } from "../main/const"
+import { EXEUTE_IS_RUNNING_PROCESS, EXEUTE_PROCESS, EXEUTE_PROCESS_STREAM, GET_CURSOR_SCREEN_POINT, GET_PRINTER_LIST_EVENT, GET_STORE_EVENT, KILL_EXEUTE_PROCESS, SET_STORE_EVENT, USER_HOME_PATH_EVENT } from "../main/const"
 
 contextBridge.exposeInMainWorld("eApi", {
     ipcRenderer: ipcRenderer,
@@ -13,7 +11,6 @@ contextBridge.exposeInMainWorld("eApi", {
     // 读取剪贴板
     getClipboardText: () => clipboard.readText("clipboard"),
     writeClipboardText: (text: string) => clipboard.writeText(text),
-    createWindow: (config: MyBrowserWindow) => ipcRenderer.send("create-window", config),
     removeWindow: (appName: string) => ipcRenderer.send("remove-window", appName),
     readFileDialogAsText: (appName: string, extensions?: string[]) => ipcRenderer.invoke("chengzi-load-dialog-file", appName, extensions),
     readFileAsText: (path: string) => ipcRenderer.invoke("chengzi-load-file", path),
@@ -54,8 +51,6 @@ contextBridge.exposeInMainWorld("titleBar", {
 
 contextBridge.exposeInMainWorld("eUtils", {
     getPcInfo,
-    // 创建文件服务器
-    // createFileServer,
     closePorcess: (args) => ipcRenderer.invoke(KILL_EXEUTE_PROCESS, args),
     execPorcess: (args) => ipcRenderer.invoke(EXEUTE_PROCESS, args),
     processIsRunning: (args) => ipcRenderer.invoke(EXEUTE_IS_RUNNING_PROCESS, args),

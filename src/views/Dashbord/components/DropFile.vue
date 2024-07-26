@@ -18,7 +18,7 @@
   </div>
 </template>
 <script lang="ts">
-import { readerHandleM3u, readerHandleTxt, readerSuffixM3u, readerSuffixTxt } from "@/utils/file";
+import { readerHandleM3u, readerHandleTxt } from "@/utils/file";
 import { useNotification } from "naive-ui";
 import { CloudUpload } from "@vicons/ionicons5";
 import { defineComponent, ref } from "vue";

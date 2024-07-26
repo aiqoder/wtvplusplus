@@ -38,6 +38,7 @@ export interface EUTILS {
     getPcInfo: () => any,
     createFileServer: (filePath: string, port = 8000) => void;
     execPorcess: (args: ExecOpts, cb?: (data: any) => void) => Promise<{ data: string, process: ChildProcessWithoutNullStreams, type: "process" | "end" }>,
+    receiveExecStream: (fn: (data: any) => void) => void;
     closePorcess: (name: string) => Promise<{ data: string, process: ChildProcessWithoutNullStreams, type: "process" | "end" }>,
     processIsRunning: (name: string) => Promise<boolean>,
     getPath: (args: string, clear?: boolean) => Promise<string>,

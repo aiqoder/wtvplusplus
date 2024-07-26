@@ -1,10 +1,10 @@
 import { parse as m3u8Parse } from "iptv-playlist-parser";
-import { defaultGroup } from "./defaultGroup";
+import { handleUserGroup } from "./defaultGroup";
 import { hasWolf } from "./util";
 
 export const isUrl = (url: string) => {
     try {
-       return !!new URL(url).protocol
+        return !!new URL(url).protocol
     } catch (error) {
         return false
     }
@@ -48,7 +48,8 @@ export interface M3UObject {
     region: string;
     rSpeed?: string;
     ratio?: string;
-    success?: boolean
+    success?: boolean;
+    fps?: number;
 }
 
 
@@ -61,7 +62,7 @@ export function readerHandleM3u(manifest: string) {
         if (hasWolf(item.name)) continue; //健康检测
         // tvg-id tvg-name tvg-logo group-title,CCTV2 财经
         if (!item.name || !item.url) continue;
-        _import_result.push({ name: item.name.replace(/tvg-(.*?) |group-title|,/g,'').trim(), url: item.url, region: "", group: item.group.title || defaultGroup(item.name) });
+        _import_result.push({ name: item.name.replace(/tvg-(.*?) |group-title|,/g, '').trim(), url: item.url, region: "", group: item.group.title || handleUserGroup(item.name) });
     }
     return _import_result
 }
@@ -81,7 +82,7 @@ export function readerHandleTxt(manifest: string) {
 
     //读取$结尾的网址 http://39.136.48.2:8089/PLTV/88888888/224/3221225859/index.m3u8$华东
     function _readerTextBy$(name: string, url: string) {
-        return { name, url: url.replace(/\$.*/, ""), region: "", group: lastGroup || defaultGroup(name)}
+        return { name, url: url.replace(/\$.*/, ""), region: "", group: lastGroup || handleUserGroup(name) }
     }
 
     // 读取井号分割的数据
@@ -96,24 +97,24 @@ export function readerHandleTxt(manifest: string) {
 
     const results = manifest?.split("\n") || [];
     const _import_result: M3UObject[] = [];
-    
+
     for (const item of results) {
         // 检查分组内容，并设置最后一次的分组名称
-        if(item.trim().endsWith("#genre#")){
+        if (item.trim().endsWith("#genre#")) {
             lastGroup = item.trim().split(",")[0]
         }
-        const [name, url] = item.replaceAll("\r","").split(",");
+        const [name, url] = item.replaceAll("\r", "").split(",");
         if (!name || !url) continue;
         if (hasWolf(name)) continue; //健康检测
 
         if (url.includes("#http")) {
             _import_result.push(..._readerTextByJing(name, url))
         } else if (isUrl(url.trim())) {// 正常URL导入
-            _import_result.push({ name, url: url.trim(), region: "", group: lastGroup || defaultGroup(name) });
+            _import_result.push({ name, url: url.trim(), region: "", group: lastGroup || handleUserGroup(name) });
             // 井号分割导入
         } else if (url.match(/\$.*/)) {
             _import_result.push(_readerTextBy$(name, url))
-        }else if(url.match(/\|.*/)){
+        } else if (url.match(/\|.*/)) {
             _import_result.push(_readerTextBy$(name, url))
         }
     }

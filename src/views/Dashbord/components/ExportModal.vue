@@ -15,7 +15,7 @@
         <template #suffix> ms </template>
       </n-input-number>
     </n-form-item>
-    <n-form-item label="分辨率" path="pixs" v-if="engine.engine === 'ffmpeg' && pixArray.length > 0">
+    <n-form-item label="分辨率" path="pixs" v-if="pixArray.length > 0">
       <n-checkbox-group v-model:value="model.pixs">
         <n-space item-style="display: flex;">
           <n-checkbox v-for="pix in pixArray" :value="pix" :label="pix" />
@@ -56,11 +56,9 @@ import { groupBy, map, uniqBy } from 'lodash';
 import { FormRules } from 'naive-ui';
 import { PropType } from 'vue';
 import { M3UObject } from '../../../utils/file';
-import { useEngine } from '../../../store/engine';
 
 const formRef = shallowRef()
 const speed = useSpeed()
-const engine = useEngine()
 interface ModelType {
   type: "m3u" | "txt" | "txt-merge",
   isGroup: 1 | 0, // 1 : 分组 2: 普通 默认0: 分组 必须输入1或0 不然会报错
@@ -77,7 +75,7 @@ const props = defineProps({
 })
 
 const pixArray = computed<string[]>(() => map(uniqBy(props.data, "ratio"), (item) => item.ratio).filter(Boolean) as string[])
-const minSpeed = computed<number>(() => Math.min(...map(props.data, (item)=> Number(item.rSpeed?.replace('ms',''))).filter(n => n > 0)))
+const minSpeed = computed<number>(() => Math.min(...map(props.data, (item) => Number(item.rSpeed?.replace('ms', '')) || 0).filter(n => n >= 0)))
 
 const model = reactive<ModelType>({
   type: "m3u",
@@ -156,8 +154,8 @@ function exportM3u(_suffix: string, exportType: 'file' | 'clip' = 'file') {
       if (item === 0) return false
       if (item === 2) return undefined
     })
-    const exportData = (engine.engine == "ffmpeg" ? props.data.filter(item => model.pixs.includes(item.ratio as string)) :
-      props.data).filter(item => success.includes(item.success)).filter(item => model.speed > 10000 ? true : Number((item.rSpeed?.replace('ms',''))) <= model.speed)
+    const exportData = props.data.filter(item => model.pixs.includes(item.ratio as string))
+      .filter(item => success.includes(item.success))
 
     if (type === "m3u") {
       return _to_M3u(unref(exportData))
@@ -203,7 +201,7 @@ const rules: FormRules = {
     message: '请选择'
   },
   pixs: {
-    required: engine.engine === 'ffmpeg' && pixArray.value.length > 0,
+    required: true,
     type: 'array',
     trigger: ['blur', 'input'],
     message: '请选择需要导出的分辨率'

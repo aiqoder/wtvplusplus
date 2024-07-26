@@ -1,6 +1,7 @@
 import { join, dirname } from 'path';
 // 执行exec 文件夹当中的程序
 export const EXEUTE_PROCESS = "EXEUTE_PROCESS"
+export const EXEUTE_PROCESS_STREAM = "EXEUTE_PROCESS_STREAM"
 export const KILL_EXEUTE_PROCESS = "KILL_EXEUTE_PROCESS"
 export const EXEUTE_IS_RUNNING_PROCESS = "EXEUTE_IS_RUNNING_PROCESS"
 

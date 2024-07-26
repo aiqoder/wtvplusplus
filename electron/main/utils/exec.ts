@@ -1,6 +1,8 @@
 import { spawn, exec } from "child_process";
 import { join } from 'path';
-import { app } from "electron"
+import { app, ipcMain } from "electron"
+import { EXEUTE_PROCESS_STREAM } from "../const";
+import { win } from "..";
 
 // 生产环境需要替换掉app.asar目录
 const appPath = app.getAppPath().replace("app.asar", "")
@@ -19,29 +21,25 @@ const processObj = {}
 export function execPorcess(exec: ExecOpts) {
     const mac = process.platform === 'darwin'
     const { root = "", args, timeout, name } = exec
+    console.log("exec args :", args)
     let resultData = ""
     const execAgrs = args.replaceAll('  ', ' ').split(" ")
-    
+
     const _root = exec.customRoot || join(`${appPath}/dist`, "/exec", mac ? `${root}Mac` : root)
 
-    const res = spawn(_root, [...execAgrs], { timeout, shell: mac })
+    const res = spawn(_root, [...execAgrs], { timeout, detached: false, shell: mac })
 
 
     if (name) processObj[name] = res
     return new Promise((resolve, reject) => {
-        res.stderr.on('error', (data) => {
-            reject({
-                data: data.toString(),
-            })
+        res.stderr.on('data', (data) => {
+            resultData += data.toString()
         });
-        
+
         res.stdout.on('data', (data) => {
             resultData += data.toString()
-            // resolve({
-            //     data: data.toString(),
-            //     buffer: data,
-            //     type: "process"
-            // })
+            win.webContents.send(EXEUTE_PROCESS_STREAM, data)
+            ipcMain.emit("main-exec-stram", data)
         });
 
         res.stdout.on('close', () => {

@@ -5,11 +5,10 @@
 
       <n-layout-sider content-style="padding-right:24px;text-align:center;" width="230">
         <SideMenu @export="exportM3u()" @check="checkM3u" @cancel="cacelCheckM3u" @getM3u="importM3u"
-          :process="checkProcess" :isImport="m3uData.length > 0" />
+          :process="checkProcess" :isImport="m3uData.length > 0" @setting="SettingModalVisible = true" />
         <n-alert title="提示" type="info" class="mt-16" :show-icon="false">
           <p>1. 列表位置，点击右键发现更多功能</p>
           <p>2. 双击名称，删除这一行</p>
-          <p>3. 检测IPv6相关地址，需要在设置当打开IPv6功能</p>
         </n-alert>
       </n-layout-sider>
       <n-layout class="no-select">
@@ -32,13 +31,14 @@
         </div>
 
         <IRightMenu @clear-list="m3uData = []" @clear-invalid="clearUnSuccessM3uData" @speed-order="rSpeedOrderBy"
-          @wolf="(w) => (operationModel.wolf = w)" @getM3u="importM3u" @open-scan="showScanVisible = true"
+          @getM3u="importM3u" @open-scan="showScanVisible = true"
           @change-name="changeNewName" :row="right.row" @load-self-group="loadSelfGroup">
           <div style="margin-top: 8px;background-color:var(--n-color)">
-            <n-data-table :columns="m3uColumns" :data="speedStore.isAutoClearInvalid ? filterInvalidData : m3uData"
-              :row-props="right.rowProps" :pagination="false" min-height="calc(100vh - 190px)"
-              max-height="calc(100vh - 190px)" :row-key="(obj) => obj.url" @update:sorter="handleSorterChange"
-              virtual-scroll :single-line="false" size="small" />
+            <n-data-table :columns="m3uColumns" :data="m3uData"
+              :row-props="right.rowProps" :pagination="false"
+              :min-height="`calc(100vh - 190px + ${search.open ? '25px' : '70px'})`"
+              :max-height="`calc(100vh - 190px + ${search.open ? '25px' : '70px'})`" :row-key="(obj) => obj.url"
+              @update:sorter="handleSorterChange" virtual-scroll :single-line="false" size="small" />
 
           </div>
         </IRightMenu>
@@ -53,46 +53,57 @@
   <!-- 导出 -->
   <n-modal v-model:show="showExportVisible" :mask-closable="false" preset="card" title="导出范围预置"
     :style="{ width: '600px' }">
-    <ExportModal :data="speedStore.isAutoClearInvalid ? filterInvalidData : m3uData" />
+    <ExportModal :data="m3uData" />
+  </n-modal>
+
+  <!-- 域名设置 -->
+  <n-modal v-model:show="SettingModalVisible" :mask-closable="false" preset="card" title="超级设置"
+    :style="{ width: '800px', minHeight: '200px' }">
+    <SettingModal/>
+  </n-modal>
+
+  <!-- 视频播放 -->
+  <n-modal v-model:show="video.visible" :mask-closable="false" preset="card" title="视频播放"
+    :style="{ width: '800px', minHeight: '200px' }">
+    <CZPlayer />
   </n-modal>
 </template>
 
 <script lang="ts" setup>
 // import 'vxe-table/lib/style.css'
-import { ref, unref, computed, reactive, watchEffect, onUnmounted, onMounted } from 'vue';
+import { ref, unref, computed, watchEffect, onUnmounted, onMounted } from 'vue';
 import { M3UObject } from "../../utils/file";
-import { jsSleep, hasWolf } from "../../utils/util";
 import useM3uTable from "./hooks/m3utable";
+import CZPlayer from "@/components/CZPlayer.vue"
 import SideMenu from "./components/SideMenu.vue";
 import SearchM3u8 from "./components/SearchM3u8.vue";
 import DropFile from "./components/DropFile.vue";
 import IRightMenu from "./components/IRightMenu.vue";
 import Scan from "./components/Scan.vue";
 import ExportModal from "./components/ExportModal.vue";
+import SettingModal from "./components/SettingModal.vue";
 // import { VxeTable, VxeColumn } from "vxe-table";
-import { getSohuSn } from "@/api";
 import { notification } from '@/utils/data';
-import { useAxiosCheck, useFfmpegCheck } from './hooks/videoCheck';
-import { useEngine } from '../../store/engine';
+import { useCheck } from './hooks/videoCheck';
 import { useTheme } from '../../store/theme';
-import { useSpeed } from '@/store/checkSpeed';
 import { useOriginData } from '@/store/originFormatData';
-import { useCommon } from '../../store/common';
 import getUrlIpWorker from "./worker/getUrlIpWorker.ts?worker"
 import { handleUserGroup } from "@/utils/defaultGroup"
+import { useSearch } from '@/store/search';
+import { useVideo } from '@/store/video';
+import { jsSleep } from '@/utils/util';
+const search = useSearch()
+const video = useVideo()
+
 const getUrlIp = new getUrlIpWorker()
 
 const { originData } = useOriginData()
 
 const showScanVisible = ref(false);
 const showExportVisible = ref(false);
+const SettingModalVisible = ref(false)
 
-getSohuSn(); // 获取搜狐的IP地址
-//------------正文逻辑开始--------------------------
-const operationModel = reactive({
-  cloud: false,
-  wolf: true,
-});
+
 //检测是否进行中
 const checkProcess = ref(false);
 //table
@@ -106,14 +117,8 @@ watch(m3uData, (data) => {
   }
 })
 
-// 使用axios测试
-const axiosCheck = useAxiosCheck()
-// 使用ffmpeg测试
-const ffmpegCheck = useFfmpegCheck()
-// 并发数量, 超时时间存储
-const speedStore = useSpeed()
-
-const engine = useEngine()
+// 使用defaultCheck测试
+const defaultCheck = useCheck()
 
 // 已检测的直播源数量
 const m3uCheckedNumbers = computed(() => {
@@ -122,9 +127,6 @@ const m3uCheckedNumbers = computed(() => {
   ).length;
 });
 
-// 清除无效源
-const filterInvalidData = computed(() => unref(m3uData).filter(m3u8 => m3u8.success != false))
-
 watchEffect(() => {
   //检测是否完成，设置完成
   if (m3uCheckedNumbers.value >= unref(m3uData).length) {
@@ -132,7 +134,7 @@ watchEffect(() => {
   }
 });
 //上传m3u文件
-function importM3u(data: M3UObject[], mode: "loacl" | "cloud" | "search") {
+function importM3u(data: M3UObject[], mode: "loacl" | "search") {
   // 如果正在检测，则不允许添加
   if (data.length == 0) {
     notification.warning({
@@ -151,26 +153,8 @@ function importM3u(data: M3UObject[], mode: "loacl" | "cloud" | "search") {
     });
     return;
   }
-  // 健康模式过滤不健康的源
-  if (operationModel.wolf) {
-    data = data.filter((item) => {
-      return !hasWolf(item.name);
-    });
-  }
-  // 本地或云端导入
-  if (mode == "cloud") {
-    operationModel.cloud = true;
-  } else {
-    operationModel.cloud = false;
-  }
 
-  if (mode == "search") {
-    // 搜索直盖接覆
-    m3uData.value = data;
-  } else {
-    // 云端追加
-    m3uData.value = [...m3uData.value, ...data];
-  }
+  m3uData.value = data;
 
   // 导入文件去除重复源
   removeDuplicationM3uData();
@@ -188,9 +172,14 @@ async function checkM3u() {
   }
 
   checkProcess.value = true;
-  let checkCount = 0; //当前检测的数量，大于10个则暂停检测, 停止1秒继续进行
+  let checkCount = 0; 
 
   for (const [index, m3u8] of unref(m3uData).entries()) {
+
+    //当前检测的数量，大于10个则暂停检测, 停止1秒继续进行
+    if(checkCount > 10) {
+      await jsSleep(1000) 
+    }
     //跳过已经检测过的源
     if (m3u8.success != undefined) {
       continue;
@@ -204,10 +193,9 @@ async function checkM3u() {
       break;
     }
 
-    // 只有检测成功才会进行如下操作
+    // 只有检测成功才会进行如下操作， 此操作是去服务器查找IP所在地
     async function _success_cb() {
       try {
-        const u = new URL(m3u8.url)
         getUrlIp.postMessage(m3u8.url)
         getUrlIp.onmessage = (res) => {
           if (!res.data) return "-"
@@ -220,51 +208,28 @@ async function checkM3u() {
       }
     }
 
-    if (engine.engine == "ffmpeg") {
-      ffmpegCheck.createRequest(m3u8).then(res => {
-        const { speed, ratio, avg_frame_rate, codec_name, pix_fmt } = res as any
-        m3u8.rSpeed = speed + "ms"
-        m3u8.ratio = ratio
-        m3u8.success = true;
-        //@ts-ignore
-        m3u8.avgFrameRate = avg_frame_rate
-        //@ts-ignore
-        m3u8.codecName = codec_name
-        //@ts-ignore
-        m3u8.pixFmt = pix_fmt
+    defaultCheck.createRequest(m3u8).then((res) => {
+      m3u8.success = true;
+      m3u8.rSpeed = res.speed + "ms"
+      m3u8.ratio = res.width ? `${res.width}x${res.height}` : '未知'
+      m3u8.fps = res.fps || 0
         _success_cb()
+    }).catch(() => {
+      // 只有检测状态才会更改结果
+      if (checkProcess.value) {
+        m3u8.rSpeed = "-1"
+        m3u8.success = false;
+      }
+    }).finally(() => {
+      checkCount -= 1;
+    })
 
-      }).catch(() => {
-        // 只有检测状态才会更改结果
-        if (checkProcess.value) {
-          m3u8.success = false;
-          m3u8.rSpeed = "-1"
-        }
-      }).finally(() => {
-        checkCount -= 1;
-      })
-    } else if (engine.engine == "default") {
-      axiosCheck.createRequest(m3u8).then(({ speed }) => {
-        m3u8.success = true;
-        m3u8.rSpeed = speed + "ms"
-        _success_cb()
-      }).catch(() => {
-        // 只有检测状态才会更改结果
-        if (checkProcess.value) {
-          m3u8.rSpeed = "-1"
-          m3u8.success = false;
-        }
-      }).finally(() => {
-        checkCount -= 1;
-      })
-    }
   }
 }
 
 //停止检测
 function cacelCheckM3u() {
-  axiosCheck.stopCheck()
-  ffmpegCheck.stopCheck()
+  defaultCheck.stopCheck()
   checkProcess.value = false;
 }
 
@@ -313,12 +278,6 @@ function loadSelfGroup() {
 // 皮肤
 const theme = useTheme()
 const chackWrapperColor = computed(() => theme.mode === "dark" ? "#203446" : "#20344660")
-
-// 检测是否有IPV6的网络
-const common = useCommon()
-onMounted(() => {
-  common.openIpv6(true, false)
-})
 </script>
 <style>
 .n-table .success-row {

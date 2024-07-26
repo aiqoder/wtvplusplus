@@ -114,7 +114,7 @@ const CRYPTOJSKEY = "一个橙子20220707";
 
 
 //解密
-export function decrypt(encryptedBase64Str) {
+export function decrypt(encryptedBase64Str: string) {
     let key = CryptoJS.enc.Utf8.parse(md5(CRYPTOJSKEY));
 
     let decryptedData = CryptoJS.AES.decrypt(encryptedBase64Str, key, {
@@ -128,4 +128,78 @@ export function decrypt(encryptedBase64Str) {
 
 export function isMac() {
     return navigator.platform.indexOf("Mac") === 0
+}
+
+
+export function getStreamFFmpegArgs(url: string, codec = "h264") {
+    /**
+     * 生成ffmpeg命令
+     * @param options {Object} 需要提供视频流转码设置
+     * @return Command {Array} 返回ffmpeg命令
+     */
+    let command = []
+    let addPrefixFlags: string[] = []
+    // console.log("makeFFmpegCmd.mjs", url.split('://')[0])
+    switch (url.split('://')[0]) {
+        case "rtmp":
+            break
+        case "rtsp":
+            addPrefixFlags = ["-rtsp_transport", "tcp"]
+            break
+        default:
+    }
+    let addSuffixFlags = ['-f', 'flv', '-c:a', 'aac']
+
+    if (codec === "h264") {
+        addSuffixFlags = [...addSuffixFlags, '-c:v', 'copy']
+    } else {
+        addSuffixFlags = [...addSuffixFlags, '-c:v', 'libx264']
+    }
+
+    return [
+        "-hide_banner",
+        ...addPrefixFlags,
+        "-i",
+        url,
+        ...addSuffixFlags,
+        "pipe:"
+    ]
+}
+
+export function getStreamInfo(data: string) {
+    const streamInfo = {
+        width: 0,
+        height: 0,
+        fps: 0,
+        codec: "",
+    }
+
+    if (data.indexOf("non-existing PPS 0 referenced") > -1) return
+    if (data.indexOf("decode_slice_header error") > -1) return
+    if (data.indexOf("no frame!") > -1) return
+
+    if (data.indexOf('Stream #0') !== -1) {
+        // console.log("getStreamInfo.mjs", data)
+        let size = data.match(/, \d+x\d+/) as any
+        if (size !== null) {
+            size = size[0].split('x')
+            streamInfo.width = parseInt(size[0].substring(1), 10)
+            streamInfo.height = parseInt(size[1], 10)
+        }
+        let fps = data.match(/\d+ fps,/) as any
+        if (fps !== null) {
+            fps = fps[0].split(' ')
+            streamInfo.fps = parseInt(fps[0], 10)
+        }
+
+        let codec = data.match(/Video: [a-z0-9_]+\b/) as any
+        if (codec !== null) {
+            codec = codec[0].split(' ')
+            streamInfo.codec = codec[1]
+        }
+
+        return streamInfo
+    }
+
+    return undefined
 }

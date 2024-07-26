@@ -1,15 +1,16 @@
 
-import { app, BrowserWindow, globalShortcut, shell, screen, nativeTheme } from 'electron'
-import { join, dirname } from 'path'
+import { app, BrowserWindow, globalShortcut, shell, screen, nativeTheme, ipcMain } from 'electron'
+import { join } from 'path'
 import { setHeaders } from './headers'
-import "./newWindow"
 import "./newDialog"
 import "./ip"
 import "./event"
 import "./fileshare/openDir"
 import menu from "./menu"
-import { startedApps } from './newWindow';
 import os from 'os'
+import { WebSocketServer } from "ws"
+import { tryUsePort } from './utils/util'
+import { store } from './utils/store'
 
 // 禁用http 缓存
 app.commandLine.appendSwitch("--disable-http-cache");
@@ -77,18 +78,32 @@ async function createWindow() {
 
   // 主窗口关闭，关闭所有子窗口
   win.once("close", () => {
-    for (const [key, win] of Object.entries(startedApps)) {
-      win.destroy()
-    }
+
   })
 
   return win
 }
 
-app.whenReady().then(()=>{
+app.whenReady().then(() => {
   createWindow()
   win?.show()
   setHeaders()
+  // 创建一个websoket服务器
+  tryUsePort(10000, (port) => {
+    console.log("===========> port", port + "")
+    store.set("wsport", port+ "")
+    const wss = new WebSocketServer({
+      port: port,
+    })
+
+    wss.on('connection', function connection(ws) {
+      ws.on('error', console.error);
+
+      ipcMain.on("main-exec-stram", (data) => {
+        ws.send(data);
+      })
+    });
+  })
 })
 
 app.on('will-quit', () => {

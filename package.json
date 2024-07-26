@@ -46,21 +46,35 @@
     "vue-tsc": "^2.0.6"
   },
   "dependencies": {
+    "@codemirror/autocomplete": "^6.17.0",
+    "@codemirror/lang-yaml": "^6.1.1",
+    "@codemirror/state": "^6.4.1",
+    "@codemirror/theme-one-dark": "^6.1.2",
+    "@codemirror/view": "^6.28.6",
+    "@ffmpeg/ffmpeg": "^0.12.10",
+    "@ffmpeg/util": "^0.12.1",
+    "@vavt/util": "^1.7.0",
     "@vicons/ionicons5": "^0.12.0",
     "@vueuse/core": "^10.11.0",
     "axios": "^1.7.2",
+    "bufferutil": "^4.0.8",
     "chardet": "^2.0.0",
+    "codemirror": "^6.0.1",
     "crypto-js": "^4.2.0",
     "dayjs": "^1.11.12",
     "express": "^4.19.2",
+    "ffmpeg-static": "^5.2.0",
     "howtools": "^0.2.4",
     "iconv-lite": "^0.6.3",
     "iptv-playlist-parser": "^0.13.0",
     "mitt": "^3.0.1",
+    "mpegts.js": "^1.7.3",
     "naive-ui": "^2.39.0",
     "pinia": "^2.1.7",
+    "utf-8-validate": "^5.0.10",
     "vue-loading-overlay": "^6.0.4",
     "vue-router": "^4.4.0",
-    "vue3-contextmenu": "^0.2.12"
+    "vue3-contextmenu": "^0.2.12",
+    "ws": "^8.11.0"
   }
 }

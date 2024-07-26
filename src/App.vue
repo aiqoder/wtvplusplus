@@ -16,7 +16,5 @@
 <script lang="ts" setup>
 import { zhCN, dateZhCN } from "naive-ui";
 import { darkTheme } from 'naive-ui'
-import { useAllWolfUrl } from "./api/wolf";
 import GroupDialog from "./components/GroupDialog.vue";
-useAllWolfUrl();
 </script>

@@ -1,30 +1,16 @@
 import { h, ref, unref } from 'vue';
-import { NTag, NButton, useNotification, NIcon, NSpace } from "naive-ui";
-import { isJSON, message, unique } from '../../../utils/data';
+import { NTag, NButton, useNotification } from "naive-ui";
+import { message, unique } from '@/utils/data';
 import emitter from '@/utils/eventbus';
 import { M3UObject } from '@/utils/file';
-import { usePageLeave } from '@vueuse/core';
-import { useList } from '../../../store/autoClearList';
-import { useEngine } from '@/store/engine';
-import { useLoading } from 'vue-loading-overlay'
-import 'vue-loading-overlay/dist/css/index.css';
 import { useSpeed } from '@/store/checkSpeed';
-import { SettingsSharp } from "@vicons/ionicons5"
-import { useCreateGroupDialog } from '@/store/createGroupDialog';
-
-const $loading = useLoading({
-    loader: "dots",
-    isFullPage: true,
-    color: "#9d4de7"
-});
+import { getStreamInfo } from '@/utils/util';
+import { useVideo } from '@/store/video';
 
 export default function useM3uTable() {
-    const isLeft = usePageLeave()
     const check = useSpeed()
-    const group = useCreateGroupDialog()
-    // region IP所在地
-    const list = useList()
-    const engine = useEngine()
+    const video = useVideo()
+
     const m3uData = ref<M3UObject[]>([])
     const notification = useNotification();
     const playDisabled = ref(false)
@@ -39,27 +25,6 @@ export default function useM3uTable() {
                     right.row = row
                 }
             }
-        }
-    })
-
-    onMounted(() => {
-        // 如果开启了存储模式，则在list 更新时自动存储播放地址
-        if (list.isAutoClearCheckList) {
-            m3uData.value = [...toRaw(list.list)]
-        }
-    })
-
-    // 鼠标离开页面触发
-    watch(isLeft, (left) => {
-        if (left && list.isAutoClearCheckList) {
-            list.list = [...m3uData.value]
-        }
-    })
-
-    // 离开页面触发
-    onBeforeUnmount(() => {
-        if (list.isAutoClearCheckList) {
-            list.list = [...m3uData.value]
         }
     })
 
@@ -85,7 +50,7 @@ export default function useM3uTable() {
     }
 
     const columns1SortOrder = ref<string | false>(false)
-    
+
     const m3uColumns = computed(() => {
         return [
             {
@@ -135,13 +100,11 @@ export default function useM3uTable() {
                 width: 130,
                 controlled: true,
             },
-            ...engine.engine === "ffmpeg" ?
-                [{
-                    title: "分辨率",
-                    key: "ratio",
-                    width: 100,
-                }] : []
-            ,
+            {
+                title: "分辨率",
+                key: "ratio",
+                width: 100,
+            },
             {
                 title: "响应速度",
                 key: "rSpeed",
@@ -149,20 +112,7 @@ export default function useM3uTable() {
                 controlled: true,
             },
             {
-                title(column) {
-                    return h(NSpace, null, [
-                        "分组",
-                        h(NIcon,
-                            {
-                                style: {
-                                    cursor: "pointer"
-                                },
-                                onClick: () => group.open = true,
-                            },
-                            { default: () => h(SettingsSharp) }
-                        ),
-                    ])
-                },
+                title: "分组",
                 key: "group",
                 ellipsis: true,
                 width: 80,
@@ -237,56 +187,21 @@ export default function useM3uTable() {
                                 disabled: playDisabled.value,
                                 onClick: () => {
                                     playDisabled.value = true;
-
-                                    const loader = $loading.show({
-                                        color: '#9d4de7',
-                                    }, {
-                                        default: () => h("div",
-                                            {
-                                                style: {
-                                                    fontSize: "1.5rem",
-                                                    color: '#9d4de7',
-                                                }
-                                            },
-                                            "视频播放中...，耐心等待。关闭视频可继续操作")
-                                    });
-
                                     window.eUtils.execPorcess({
-                                        root: "ffmpeg/ffprobe",
+                                        root: "ffmpeg/ffmpeg",
                                         timeout: check.timeout * 1000,
-                                        args: `-select_streams v -show_format -show_streams -v quiet -of json -i ${row.url}`,
+                                        args: `-hide_banner -i ${row.url}`,
                                     }).then((response) => {
-                                        if (!isJSON(response.data)) {
-                                            notification.error({
-                                                title: "提示",
-                                                content: "视频无法播放，可复制链接使用potplayer或者vlc进行尝试",
-                                                duration: 8000,
-                                            })
-                                            loader.hide()
-                                            playDisabled.value = false;
-                                            return
+                                        const info = getStreamInfo(response.data)
+                                        if (info) {
+                                            video.url = row.url
+                                            video.toggle()
+                                        } else {
+                                            message.error("视频播放失败...")
                                         }
-                                        const record = JSON.parse(response.data)["streams"] || []
-                                        if (record.length === 0) {
-                                            message.error("视频无法播放，请检查")
-                                            loader.hide()
-                                            playDisabled.value = false;
-                                            return
-                                        }
-                                        const { width } = record[0] || {}
-                                        const fixName = (name: string) => String(name).replace(/\s*/g, "");
-                                        window.eUtils.execPorcess({
-                                            root: "ffmpeg/ffplay",
-                                            args: `-x 960 -y 540 ${!width ? '-showmode 1' : ''} -window_title ${fixName(row.name as string)} ${row.url}`,
-                                            timeout: 0,
-                                        }).then((res: any) => {
-                                            const result = res.data.replace("\n", "").replace("\r", "")
-                                            if (result == "") {
-                                                message.error("视频意外关闭，或者无法播放")
-                                                loader.hide()
-                                            }
-                                            playDisabled.value = false;
-                                        })
+                                        playDisabled.value = false;
+                                    }).catch(()=>{
+                                        playDisabled.value = false;
                                     })
                                 },
                             },

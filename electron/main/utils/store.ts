@@ -22,7 +22,11 @@ const store = new Store({
         bookmarks: {
             type: "array",
             default: []
-        }
+        },
+        wsport: {
+            type: "string",
+            default: ""
+        },
     }
 })
 

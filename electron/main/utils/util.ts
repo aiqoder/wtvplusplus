@@ -1,8 +1,9 @@
 import path, { join } from "path"
-import { app } from "electron"
+import { app, ipcMain } from "electron"
 import fs from 'fs';
 import iconv from "iconv-lite"
 import chardet from "chardet"
+import { WebSocketServer } from "ws"
 
 import * as net from 'net' 	// for testing only
 export const ROOT_DOCUMENTS = path.join(app.getPath("documents"), "yigechengzipro")
@@ -73,4 +74,31 @@ export function writeFileAsText(file: string, data: string) {
       }
     })
   })
+}
+
+export const tryUsePort = async function (port, portAvailableCallback) {
+  function portUsed(port) {
+    return new Promise((resolve, reject) => {
+      let server = net.createServer().listen(port);
+      server.on('listening', function () {
+        server.close();
+        resolve(port);
+      });
+      server.on('error', function (err) {
+        // @ts-ignore
+        if (err.code == 'EADDRINUSE') {
+          resolve(err);
+        }
+      });
+    });
+  }
+
+  let res = await portUsed(port);
+  if (res instanceof Error) {
+    console.log(`端口：${port}被占用\n`);
+    port++;
+    tryUsePort(port, portAvailableCallback);
+  } else {
+    portAvailableCallback(port);
+  }
 }

@@ -1,5 +1,13 @@
 <template>
-  <n-button class="w-100" style="width: 200px" color="#8a2be2" ghost @click="changeFile">
+  <n-button class="w-100" style="width: 200px" color="#8a2be2" ghost @click="handleSetting">
+    <template #icon>
+      <n-icon>
+        <SettingsOutline />
+      </n-icon>
+    </template>
+    超级设置
+  </n-button>
+  <n-button class="w-100 mt-16" style="width: 200px" color="#8a2be2" ghost @click="changeFile">
     <template #icon>
       <n-icon>
         <VideocamOutlineIcon />
@@ -60,9 +68,9 @@ import {
   ArrowUndoCircleSharp as ArrowUndoCircleSharpIcon,
   RemoveCircleOutline as RemoveCircleOutlineIcon,
   ShieldCheckmarkOutline as ShieldCheckmarkOutlineIcon,
+  SettingsOutline
 } from "@vicons/ionicons5";
 import { readerHandleTxt } from "@/utils/file";
-import appName from "@/utils/appName";
 import { readerHandleM3u } from '../../../utils/file';
 import { useOriginData } from "@/store/originFormatData";
 export default defineComponent({
@@ -83,6 +91,7 @@ export default defineComponent({
     cancel: null,
     exportM3u: null,
     export: null,
+    setting: null,
   },
   components: {
     SingleUpload,
@@ -92,6 +101,7 @@ export default defineComponent({
     ArrowUndoCircleSharpIcon,
     RemoveCircleOutlineIcon,
     ShieldCheckmarkOutlineIcon,
+    SettingsOutline,
   },
   setup(props, { emit }) {
     const { importTxt, hasImport } = useOriginData()
@@ -99,7 +109,7 @@ export default defineComponent({
 
     // 本地文件导入逻辑
     function changeFile() {
-      window.eApi.readFileDialogAsText(appName).then(res=>{
+      window.eApi.readFileDialogAsText().then(res=>{
         const { path, data } = res
         const suffix = path.slice(path.lastIndexOf("."), path.length);
         if (suffix.indexOf("m3u") > -1) {
@@ -112,8 +122,14 @@ export default defineComponent({
       })
     }
 
+    // 设置
+    function handleSetting(){
+      emit("setting")
+    }
+
     return {
       changeFile,
+      handleSetting,
       accept,
       hasImport,
     };

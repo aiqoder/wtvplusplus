@@ -1,5 +1,5 @@
 <template>
-  <div class="soso-wrapper">
+  <div class="soso-wrapper" v-show="searchUrl.open">
     <span>搜一搜：</span>
     <n-input :on-change="() => changeSoso(searchValue)" type="text" placeholder="输入搜索内容，按下回车键搜索" :loading="loading"
       :maxlength="1000" v-model:value="searchValue">
@@ -12,26 +12,24 @@ import { debounce } from "howtools";
 import { useSearch } from '@/store/search';
 import axios from 'axios';
 import { message } from '@/utils/data';
-import { defaultGroup } from '../../../utils/defaultGroup';
-import { useCommon } from '@/store/common';
+import { handleUserGroup } from '../../../utils/defaultGroup';
 export default defineComponent({
   setup(props, { emit }) {
     const searchUrl = useSearch()
-    const common = useCommon()
     const loading = ref(false);
     const searchValue = ref("");
 
     function preSearch(value: string) {
       if (searchUrl.url) {
-        axios.get(searchUrl.url, { params: { tvName: value, isIpv6: common.ipv6 ? "1" : "0" } }).then(res => {
+        axios.get(`${searchUrl.getUrl}/v1/tv/json`, { params: { tvName: value } }).then(res => {
           const json = res.data?.data || []
           // 云端搜索追加分类
           json.forEach(element => {
-            element.group = defaultGroup(element.name)
+            element.group = handleUserGroup(element.name)
           });
           emit("getM3u", json, "search");
         }).catch(err => {
-          message.warning("服务繁忙，稍后再试")
+          message.warning(err)
         }).finally(() => {
           loading.value = false;
           searchValue.value = "";

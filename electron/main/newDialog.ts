@@ -1,10 +1,9 @@
 import { dialog, ipcMain } from "electron"
-import { startedApps } from "./newWindow";
 import { readFileAsText, writeFileAsText } from './utils/util';
 
-function readFileDialogAsText(appName: string, extensions = ['txt', 'm3u', 'm3u8']) {
+function readFileDialogAsText(extensions = ['txt', 'm3u', 'm3u8']) {
   return new Promise((reslove, reject) => {
-    dialog.showOpenDialog(startedApps[appName], {
+    dialog.showOpenDialog({
       title: " 🍊请选择文件夹，公众号：一个橙子pro  🍊",
       buttonLabel: "选好了就点这里吧",
       properties: ['openFile'],

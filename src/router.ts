@@ -2,7 +2,8 @@ import { createRouter, createWebHashHistory } from 'vue-router'
 import Layout from "@/components/Layout/Index.vue"
 import DashBoard from "@/views/Dashbord/Index.vue"
 import Create from "@/views/Create.vue"
-import Settings from "@/views/Settings/Index.vue"
+import Tv from "@/views/Tv/Index.vue"
+import Rule from "@/views/Rule/Index.vue"
 const router = createRouter({
   history: createWebHashHistory(),
   routes: [
@@ -31,11 +32,19 @@ const router = createRouter({
           }
         },
         {
-          path: '/settings',
-          name: 'Settings',
-          component: Settings,
+          path: '/tv',
+          name: 'tv',
+          component: Tv,
           meta: {
-            title: '设置'
+            title: '超级电台'
+          }
+        },
+        {
+          path: '/rule',
+          name: 'rule',
+          component: Rule,
+          meta: {
+            title: '规则引擎'
           }
         },
       ]

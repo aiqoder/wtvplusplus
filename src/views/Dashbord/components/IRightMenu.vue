@@ -21,10 +21,6 @@
         <span class="line-check"></span>
         <span class="line-text">载入自定义分组</span>
       </context-menu-item>
-      <context-menu-item @itemClickHandle="startWolf">
-        <span class="line-check" :style="{ visibility: isCheckWolf ? undefined : 'hidden' }">✓</span>
-        <span class="line-text">健康模式</span>
-      </context-menu-item>
       <context-menu-item @click="$emit('open-scan')">
         <span class="line-check"></span>
         <span class="line-text">扫源小助手</span>
@@ -137,11 +133,6 @@ export default defineComponent({
       emit("load-self-group");
     }
 
-    function startWolf() {
-      isCheckWolf.value = !isCheckWolf.value;
-      emit("wolf", isCheckWolf.value);
-    }
-
     onMounted(() => {
       emit("wolf", isCheckWolf.value);
     });
@@ -177,7 +168,6 @@ export default defineComponent({
       clipboardTextImport,
       clearList,
       clearInvalid,
-      startWolf,
       loadSelfGroup,
       isCheckWolf,
       speedOrder,

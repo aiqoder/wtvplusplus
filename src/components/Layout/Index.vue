@@ -1,24 +1,20 @@
 <template>
-  <div class="layout-container bg-black">
+  <div class="layout-container">
     <div class="layout-container--left">
       <MenusComponent />
     </div>
     <div class="layout-container--right">
       <router-view></router-view>
-      <!-- 登录 -->
-      <Login />
     </div>
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, ref } from "vue";
+import { defineComponent } from "vue";
 import MenusComponent from "./Menus.vue";
-import Login from "./LoginDialog.vue";
 // import { isMac } from "@/utils/util";
 export default defineComponent({
   components: {
     MenusComponent,
-    Login,
   },
 });
 </script>
@@ -35,6 +31,7 @@ export default defineComponent({
   &--right {
     flex: 1;
     position: relative;
+    width: 0;
   }
 }
 </style>
