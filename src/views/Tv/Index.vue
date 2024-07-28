@@ -10,9 +10,10 @@
                 </n-collapse-item>
             </n-collapse>
         </div>
-        <div class="flex-1 bg-black flex flex-col justify-center items-center overflow-hidden">
-            <span style="color: aliceblue" v-if="msg">{{ msg }} {{ currentInfo }}</span>
-            <VideoPlayer :url="currentUrl" :info="currentInfo"  />
+        <div class="flex-1 bg-black flex flex-col justify-center items-center overflow-hidden pos-relative">
+            <span class=" pos-absolute pos-top-0" style="color: aliceblue" v-if="msg">{{ msg }} {{ currentInfo }}</span>
+            <span class=" pos-absolute pos-bottom-0 text-white" v-if="currentUrl">当前正在播放：{{ currentUrl }}</span>
+            <VideoPlayer :url="currentUrl" :info="currentInfo" />
         </div>
     </div>
 </template>
@@ -21,7 +22,9 @@ import { isUrl } from '@/utils/file';
 import { getStreamInfo } from '@/utils/util';
 import axios from 'axios';
 import VideoPlayer from "./VideoPlayer.vue"
+import { useLoadingBar } from 'naive-ui';
 
+const loadingBar = useLoadingBar()
 const baseUrl = localStorage.getItem("search-url")
 const msg = ref("")
 type IGroup = {
@@ -35,7 +38,8 @@ const groups = ref<IGroup>()
 const currentName = ref()
 
 onMounted(() => {
-    axios.get(`${baseUrl}/v1/tv/super`).then(res => {
+    loadingBar.start()
+    axios.get(`${baseUrl}/v1/tv/super`, { params: { password: localStorage.getItem("rule_password") } }).then(res => {
         const manifest = res.data || ""
 
         const xgroup: any = {}
@@ -56,8 +60,8 @@ onMounted(() => {
                 xgroup[lastGroup].push({ name: name, url: url })
             }
         }
-
         groups.value = xgroup
+        loadingBar.finish()
     })
 })
 

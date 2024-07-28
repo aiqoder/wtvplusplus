@@ -31,9 +31,9 @@ async function player(videoElement: Ref<HTMLVideoElement>) {
 }
 
 // 监听URL进行拉流
-watch(() => props.url, (url) => {
+watch(() => props.url, async (url) => {
     if (!url) return
-    window.eUtils.closePorcess(name)
+    await window.eUtils.closePorcess(name)
     name = Math.random().toString(16).slice(2)
 
     window.eUtils.execPorcess({

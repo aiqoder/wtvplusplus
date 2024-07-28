@@ -17,8 +17,9 @@ export const useCreateGroupDialog = defineStore("createGroupDialog", () => {
     }
 
     function updateYaml(data: string) {
+        const pwd = sessionStorage.getItem("raw_rule_password")
         const baseUrl = localStorage.getItem("search-url")
-        return axios.post(`${baseUrl}/v1/tv/rule/update`, { data })
+        return axios.post(`${baseUrl}/v1/tv/rule/update`, { data, password: pwd })
     }
 
     return {
