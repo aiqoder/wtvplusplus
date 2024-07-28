@@ -65,6 +65,10 @@ onMounted(() => {
     })
 })
 
+onUnmounted(() => {
+    loadingBar.finish()
+})
+
 
 const currentUrl = ref()
 const currentInfo = ref({})
