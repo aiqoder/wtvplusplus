@@ -151,9 +151,9 @@ export function getStreamFFmpegArgs(url: string, codec = "h264") {
     let addSuffixFlags = ['-f', 'flv', '-c:a', 'aac']
 
     if (codec === "h264") {
-        addSuffixFlags = [...addSuffixFlags, '-c:v', 'copy']
+        addSuffixFlags = [...addSuffixFlags, '-c:v', 'h264']
     } else {
-        addSuffixFlags = [...addSuffixFlags, '-c:v', 'libx264']
+        addSuffixFlags = [...addSuffixFlags, '-c:v', 'h264']
     }
 
     return [
