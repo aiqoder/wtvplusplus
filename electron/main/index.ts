@@ -9,8 +9,8 @@ import "./fileshare/openDir"
 import menu from "./menu"
 import os from 'os'
 import { WebSocketServer } from "ws"
-import { tryUsePort } from './utils/util'
 import { store } from './utils/store'
+import getPort, { portNumbers } from './utils/getport';
 
 // 禁用http 缓存
 app.commandLine.appendSwitch("--disable-http-cache");
@@ -84,17 +84,20 @@ async function createWindow() {
   return win
 }
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
   createWindow()
   win?.show()
   setHeaders()
   // 创建一个websoket服务器
-  tryUsePort(10000, (port) => {
+  getPort({ port: portNumbers(9527, 10000) }).then((port) => {
     console.log("===========> port", port + "")
-    store.set("wsport", port+ "")
+    store.set("wsport", port + "")
     const wss = new WebSocketServer({
+      host: "127.0.0.1",
       port: port,
     })
+
+    wss.on('error', console.error);
 
     wss.on('connection', function connection(ws) {
       ws.on('error', console.error);

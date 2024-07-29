@@ -37,8 +37,13 @@ export function execPorcess(exec: ExecOpts) {
         });
 
         res.stdout.on('data', (data) => {
-            resultData += data.toString()
-            win.webContents.send(EXEUTE_PROCESS_STREAM, data)
+            if(resultData.length < 1024 * 1024) {
+                resultData += data?.toString() || ""
+            }
+
+            // win.webContents.send(EXEUTE_PROCESS_STREAM, data)
+            // console.log(data);
+            
             ipcMain.emit("main-exec-stram", data)
         });
 
