@@ -3,7 +3,7 @@
   "$schema": "https://raw.githubusercontent.com/electron-userland/electron-builder/master/packages/app-builder-lib/scheme.json",
   "appId": "yigechengzi",
   "asar": false,
-  "productName": "wtv-tools",
+  "productName": "wtv-next",
   "directories": {
     "output": "release/${version}"
   },
@@ -26,7 +26,9 @@
         ]
       }
     ],
-    "artifactName": "${productName}-Windows-${version}-Setup.${ext}"
+    artifactName: 'yigechengzipro_${version}_${arch}.${ext}',
+    icon: 'icons/tv.ico',
+    verifyUpdateCodeSignature: false,
   },
   "nsis": {
     "oneClick": false,
