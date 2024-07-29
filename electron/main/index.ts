@@ -62,8 +62,8 @@ async function createWindow() {
   nativeTheme.themeSource = 'dark'
 
   if (app.isPackaged) {
-    win.setMenu(menu)
-    win.loadFile(join(__dirname, '../rendererMain/index.html'))
+    // win.setMenu(menu)
+    win.loadFile(join(__dirname, '../renderer/index.html'))
 
   } else {
     win.loadURL("http://127.0.0.1:3344")
