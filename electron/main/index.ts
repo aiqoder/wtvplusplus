@@ -9,8 +9,8 @@ import "./fileshare/openDir"
 import menu from "./menu"
 import os from 'os'
 import { WebSocketServer } from "ws"
+import { tryUsePort } from './utils/util'
 import { store } from './utils/store'
-import getPort, { portNumbers } from './utils/getport';
 
 // 禁用http 缓存
 app.commandLine.appendSwitch("--disable-http-cache");
@@ -25,9 +25,6 @@ if (!app.requestSingleInstanceLock()) {
   process.exit(0)
 }
 process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true'
-
-// Disable GPU Acceleration for Windows 7
-if (os.release().startsWith('6.1')) app.disableHardwareAcceleration()
 
 // Set application name for Windows 10+ notifications
 if (process.platform === 'win32') app.setAppUserModelId(app.getName())
@@ -59,12 +56,14 @@ async function createWindow() {
     // maximizable: false,
   })
 
+  // 后台渲染
+  win.webContents.setFrameRate(60)
+
   nativeTheme.themeSource = 'dark'
 
   if (app.isPackaged) {
-    // win.setMenu(menu)
+    win.setMenu(menu)
     win.loadFile(join(__dirname, '../renderer/index.html'))
-
   } else {
     win.loadURL("http://127.0.0.1:3344")
   }
@@ -84,20 +83,17 @@ async function createWindow() {
   return win
 }
 
-app.whenReady().then(async () => {
+app.whenReady().then(() => {
   createWindow()
   win?.show()
   setHeaders()
   // 创建一个websoket服务器
-  getPort({ port: portNumbers(9527, 10000) }).then((port) => {
+  tryUsePort(10000, (port) => {
     console.log("===========> port", port + "")
-    store.set("wsport", port + "")
+    store.set("wsport", port+ "")
     const wss = new WebSocketServer({
-      host: "127.0.0.1",
       port: port,
     })
-
-    wss.on('error', console.error);
 
     wss.on('connection', function connection(ws) {
       ws.on('error', console.error);

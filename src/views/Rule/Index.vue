@@ -46,6 +46,7 @@ onUnmounted(() => {
 
 :global(.n-modal-mask) {
     background-color: transparent;
+    left: 6rem;
 }
 
 :global(.n-modal-body-wrapper) {

@@ -1,7 +1,7 @@
 <template>
     <n-form ref="formRef" :model="formModel" :rules="rules" label-placement="left" label-width="auto">
         <n-form-item label="开启搜一搜">
-            <n-switch size="small" v-model:value="formModel.open" @change="changeSoso"/>
+            <n-switch size="small" v-model:value="formModel.open" @update:value="changeSoso"/>
         </n-form-item>
         <n-form-item label="超级网关" v-if="formModel.open">
             <n-input v-model:value="search.url" clearable placeholder="请输入超级网关" />

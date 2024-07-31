@@ -176,9 +176,9 @@ async function checkM3u() {
 
   for (const [index, m3u8] of unref(m3uData).entries()) {
 
-    //当前检测的数量，大于10个则暂停检测, 停止1秒继续进行
+    //当前检测的数量，大于10个则暂停检测, 停止200ms继续进行
     if(checkCount > 10) {
-      await jsSleep(1000) 
+      await jsSleep(200) 
     }
     //跳过已经检测过的源
     if (m3u8.success != undefined) {
