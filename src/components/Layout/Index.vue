@@ -4,7 +4,11 @@
       <MenusComponent />
     </div>
     <div class="layout-container--right">
-      <router-view></router-view>
+      <router-view v-slot="{ Component }">
+        <KeepAlive include="dashbord">
+          <component :is="Component"></component>
+        </KeepAlive>
+      </router-view>
     </div>
   </div>
 </template>
@@ -22,6 +26,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 .layout-container {
   display: flex;
+
   &--left {
     width: 80px;
     box-shadow: 0px 5px 5px #88888890;
@@ -32,6 +37,8 @@ export default defineComponent({
     flex: 1;
     position: relative;
     width: 0;
+    overflow: auto;
+    height: 100vh;
   }
 }
 </style>

@@ -13,6 +13,14 @@
         <div class="flex-1 bg-black flex flex-col justify-center items-center overflow-hidden pos-relative">
             <span class=" pos-absolute pos-top-0" style="color: aliceblue" v-if="msg">{{ msg }} {{ currentInfo }}</span>
             <span class=" pos-absolute pos-bottom-0 text-white" v-if="currentUrl">当前正在播放：{{ currentUrl }}</span>
+            <div v-if="failUrls.length > 0" class=" pos-absolute pos-bottom-0 pos-right-0 text-white cursor-pointer"  title="播放失败清单" @click="toogleFail()">
+                <Warning class="w-3rem text-red"/>
+            </div>
+            <div v-show="failVisible" class=" pos-absolute pos-inset-0 pos-bottom-[3rem] pos-top-2xl text-white p-1 overflow-auto z-10 bg-[rgba(0,0,0,.8)]">
+                <div v-for="f in failUrls" class=" text-nowrap text-ellipsis overflow-hidden whitespace-nowrap">
+                    {{ f.name }},{{ f.url }}
+                </div>
+            </div>
             <VideoPlayer :url="currentUrl" :info="currentInfo" />
         </div>
     </div>
@@ -23,6 +31,11 @@ import { getStreamInfo } from '@/utils/util';
 import axios from 'axios';
 import VideoPlayer from "./VideoPlayer.vue"
 import { useLoadingBar } from 'naive-ui';
+import { Warning } from "@vicons/ionicons5"
+import { useToggle } from '@vueuse/core'
+
+const [failVisible, toogleFail] = useToggle()
+const failUrls = ref<any[]>([])
 
 const loadingBar = useLoadingBar()
 const baseUrl = localStorage.getItem("search-url")
@@ -80,6 +93,10 @@ async function handlePlay(a) {
     msg.value = `发现${urls.length}个链接，正在尝试解析...`
 
     for (const [index, u] of urls.entries()) {
+        // 切换链接，原先的不继续检测
+        if(a.name != currentName.value) {
+            return
+        }
         // 排除空连接
         if (!u) continue
         const response = await window.eUtils.execPorcess({
@@ -97,6 +114,8 @@ async function handlePlay(a) {
                 msg.value = ""
             }, 1000)
             break;
+        }else {
+            failUrls.value.push({name: a.name, url: u})
         }
         msg.value = `链接：${u} 解析失败，正在尝试获取下一个链接...`
 

@@ -95,8 +95,8 @@ export default function useM3uTable() {
                 },
             },
             {
-                title: "归属地",
-                key: "region",
+                title: "码率",
+                key: "fps",
                 width: 130,
                 controlled: true,
             },

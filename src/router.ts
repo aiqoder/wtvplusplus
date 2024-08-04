@@ -36,7 +36,7 @@ const router = createRouter({
           name: 'tv',
           component: Tv,
           meta: {
-            title: '超级电台'
+            title: '测试播放'
           }
         },
         {

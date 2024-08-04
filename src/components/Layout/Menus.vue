@@ -37,7 +37,7 @@ const meuns = computed(() => [
     show: true,
   },
   {
-    title: "超级电台",
+    title: "测试播放",
     com: TvSharp,
     key: "tv",
     routerName: "tv",

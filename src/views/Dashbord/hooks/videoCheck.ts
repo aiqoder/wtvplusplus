@@ -19,9 +19,10 @@ export function useCheck() {
       }).then(response => {
         const info = getStreamInfo(response.data)
         if (info) {
-          addTvs({ url: m3u8.url, name: m3u8.name, id: m3u8.id })
+          addTvs({ url: m3u8.url, name: m3u8.name, id: m3u8.id, fail: false })
           resolve({ ...info, speed: new Date().getTime() - start })
         } else {
+          addTvs({ url: m3u8.url, name: m3u8.name, id: m3u8.id, fail: true })
           reject()
         }
       }).catch(reject)

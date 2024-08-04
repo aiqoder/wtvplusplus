@@ -31,11 +31,10 @@
         </div>
 
         <IRightMenu @clear-list="m3uData = []" @clear-invalid="clearUnSuccessM3uData" @speed-order="rSpeedOrderBy"
-          @getM3u="importM3u" @open-scan="showScanVisible = true"
-          @change-name="changeNewName" :row="right.row" @load-self-group="loadSelfGroup">
+          @getM3u="importM3u" @open-scan="showScanVisible = true" @change-name="changeNewName" :row="right.row"
+          @load-self-group="loadSelfGroup">
           <div style="margin-top: 8px;background-color:var(--n-color)">
-            <n-data-table :columns="m3uColumns" :data="m3uData"
-              :row-props="right.rowProps" :pagination="false"
+            <n-data-table :columns="m3uColumns" :data="m3uData" :row-props="right.rowProps" :pagination="false"
               :min-height="`calc(100vh - 190px + ${search.open ? '25px' : '70px'})`"
               :max-height="`calc(100vh - 190px + ${search.open ? '25px' : '70px'})`" :row-key="(obj) => obj.url"
               @update:sorter="handleSorterChange" virtual-scroll :single-line="false" size="small" />
@@ -59,7 +58,7 @@
   <!-- 域名设置 -->
   <n-modal v-model:show="SettingModalVisible" :mask-closable="false" preset="card" title="超级设置"
     :style="{ width: '800px', minHeight: '200px' }">
-    <SettingModal/>
+    <SettingModal />
   </n-modal>
 
   <!-- 视频播放 -->
@@ -87,15 +86,17 @@ import { notification } from '@/utils/data';
 import { useCheck } from './hooks/videoCheck';
 import { useTheme } from '../../store/theme';
 import { useOriginData } from '@/store/originFormatData';
-import getUrlIpWorker from "./worker/getUrlIpWorker.ts?worker"
 import { handleUserGroup } from "@/utils/defaultGroup"
 import { useSearch } from '@/store/search';
 import { useVideo } from '@/store/video';
 import { jsSleep } from '@/utils/util';
+
+defineOptions({
+  name: "dashbord"
+})
+
 const search = useSearch()
 const video = useVideo()
-
-const getUrlIp = new getUrlIpWorker()
 
 const { originData } = useOriginData()
 
@@ -172,13 +173,13 @@ async function checkM3u() {
   }
 
   checkProcess.value = true;
-  let checkCount = 0; 
+  let checkCount = 0;
 
   for (const [index, m3u8] of unref(m3uData).entries()) {
 
     //当前检测的数量，大于10个则暂停检测, 停止200ms继续进行
-    if(checkCount > 10) {
-      await jsSleep(200) 
+    if (checkCount > 10) {
+      await jsSleep(200)
     }
     //跳过已经检测过的源
     if (m3u8.success != undefined) {
@@ -193,27 +194,11 @@ async function checkM3u() {
       break;
     }
 
-    // 只有检测成功才会进行如下操作， 此操作是去服务器查找IP所在地
-    async function _success_cb() {
-      try {
-        getUrlIp.postMessage(m3u8.url)
-        getUrlIp.onmessage = (res) => {
-          if (!res.data) return "-"
-          const { province, city, isp } = res.data
-          if (!province || !city) return ""
-          m3u8.region = `${province}${city}${isp}`
-        }
-      } catch (error) {
-        console.log(error);
-      }
-    }
-
     defaultCheck.createRequest(m3u8).then((res) => {
       m3u8.success = true;
       m3u8.rSpeed = res.speed + "ms"
       m3u8.ratio = res.width ? `${res.width}x${res.height}` : '未知'
       m3u8.fps = res.fps || 0
-        _success_cb()
     }).catch(() => {
       // 只有检测状态才会更改结果
       if (checkProcess.value) {
@@ -278,6 +263,13 @@ function loadSelfGroup() {
 // 皮肤
 const theme = useTheme()
 const chackWrapperColor = computed(() => theme.mode === "dark" ? "#203446" : "#20344660")
+
+onDeactivated(() => {
+  showExportVisible.value = false
+  showScanVisible.value = false
+  SettingModalVisible.value = false
+  video.visible = false
+})
 </script>
 <style>
 .n-table .success-row {
@@ -329,7 +321,7 @@ const chackWrapperColor = computed(() => theme.mode === "dark" ? "#203446" : "#2
     display: flex;
 
     span {
-      flex-basis: 150px;
+      flex-basis: 200px;
     }
   }
 

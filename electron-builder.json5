@@ -26,8 +26,8 @@
         ]
       }
     ],
-    artifactName: 'yigechengzipro_${version}_${arch}.${ext}',
-    icon: 'icons/tv.ico',
+    artifactName: '${productName}_${version}_${arch}.${ext}',
+    icon: 'icons/wtv.ico',
     verifyUpdateCodeSignature: false,
   },
   "nsis": {
