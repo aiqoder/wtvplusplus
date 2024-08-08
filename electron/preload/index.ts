@@ -3,7 +3,7 @@ import { shell } from "electron"
 import { getPcInfo } from "./utils";
 import { getVideoInfo, getVersion, killPid, killAll, playVideo, killVideo } from './ffmpeg';
 import { getIp } from "./ip";
-import { EXEUTE_IS_RUNNING_PROCESS, EXEUTE_PROCESS, EXEUTE_PROCESS_STREAM, GET_CURSOR_SCREEN_POINT, GET_PRINTER_LIST_EVENT, GET_STORE_EVENT, KILL_EXEUTE_PROCESS, SET_STORE_EVENT, USER_HOME_PATH_EVENT } from "../main/const"
+import { EXEUTE_IS_RUNNING_PROCESS, EXEUTE_PROCESS, GET_CURSOR_SCREEN_POINT, GET_PRINTER_LIST_EVENT, GET_STORE_EVENT, KILL_EXEUTE_PROCESS, SET_STORE_EVENT, USER_HOME_PATH_EVENT } from "../main/const"
 
 contextBridge.exposeInMainWorld("eApi", {
     ipcRenderer: ipcRenderer,

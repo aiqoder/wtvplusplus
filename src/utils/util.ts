@@ -185,6 +185,11 @@ export function getStreamInfo(data: string) {
             size = size[0].split('x')
             streamInfo.width = parseInt(size[0].substring(1), 10)
             streamInfo.height = parseInt(size[1], 10)
+
+            // 分辨率宽度太小，直接忽略
+            if(streamInfo.width < 300) {
+                return
+            }
         }
         let fps = data.match(/\d+ fps,/) as any
         if (fps !== null) {
