@@ -22,6 +22,13 @@ const searchMode = ref("so"); // 搜索模式
 const emit = defineEmits()
 
 function preSearch(value: string) {
+  if(unref(searchMode) == "me" && value == "auto check") {
+    emit('autoCheck', true)
+    loading.value = false;
+    searchValue.value = ""
+    return
+  }
+
   if (searchUrl.url) {
     axios.get(`${searchUrl.getUrl}/v1/tv/json`, { params: { tvName: value, mode: unref(searchMode) } }).then(res => {
       const json = res.data?.data || []

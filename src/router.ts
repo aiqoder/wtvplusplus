@@ -4,6 +4,7 @@ import DashBoard from "@/views/Dashbord/Index.vue"
 import Create from "@/views/Create.vue"
 import Tv from "@/views/Tv/Index.vue"
 import Rule from "@/views/Rule/Index.vue"
+import SilentGuardian from "@/views/SilentGuardian.vue"
 const router = createRouter({
   history: createWebHashHistory(),
   routes: [

@@ -177,6 +177,7 @@ export function getStreamInfo(data: string) {
     if (data.indexOf("non-existing PPS 0 referenced") > -1) return
     if (data.indexOf("decode_slice_header error") > -1) return
     if (data.indexOf("no frame!") > -1) return
+    if (data.indexOf("Video: png") > -1) return // 忽略图片
 
     if (data.indexOf('Stream #0') !== -1) {
         // console.log("getStreamInfo.mjs", data)
@@ -187,7 +188,7 @@ export function getStreamInfo(data: string) {
             streamInfo.height = parseInt(size[1], 10)
 
             // 分辨率宽度太小，直接忽略
-            if(streamInfo.width < 300) {
+            if(streamInfo.width < 1280 || streamInfo.height < 720) { // 忽略过低的分辨率视频
                 return
             }
         }

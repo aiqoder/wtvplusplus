@@ -11,23 +11,30 @@
           <p>2. 双击名称，删除这一行</p>
         </n-alert>
       </n-layout-sider>
-      <n-layout class="no-select">
+      <n-layout>
         <!-- 检测进度 -->
-        <div class="check-wrapper">
-          <div class="check-number">
+        <div class=" flex bg-[#203446] py-1.5 px-4 rounded justify-between">
+          <div class=" inline-flex gap-8">
             <span>已检测: {{ m3uCheckedNumbers }}/{{ m3uData.length }}</span>
             <span>可用: {{ m3uData.filter((m3u8) => m3u8.success).length }}</span>
           </div>
-          <div class="check-progress">
+          <div>
             检测进度：
             <span style="color: #9d4de7; font-weight: 700">{{
               ((m3uCheckedNumbers / (m3uData.length || 1)) * 100).toFixed(2)
             }}%</span>
           </div>
+          <div class=" w-8 cursor-pointer" v-show="sleepShow" @mouseover="sleepShow = true" @mouseleave="sleepShow = false">
+            <span >
+              <n-icon size="1.2rem">
+                <AlarmSharp/>
+              </n-icon>
+            </span>
+          </div>
         </div>
         <!-- 搜索 -->
         <div style="margin-top: 8px">
-          <SearchM3u8 @getM3u="importM3u" />
+          <SearchM3u8 @getM3u="importM3u" @autoCheck="handleAutoCheck"/>
         </div>
 
         <IRightMenu @clear-list="m3uData = []" @clear-invalid="clearUnSuccessM3uData" @speed-order="rSpeedOrderBy"
@@ -57,7 +64,7 @@
 
   <!-- 域名设置 -->
   <n-modal v-model:show="SettingModalVisible" :mask-closable="false" preset="card" title="超级设置"
-    :style="{ width: '800px', minHeight: '200px' }">
+    :style="{ width: '700px', minHeight: '200px' }">
     <SettingModal />
   </n-modal>
 
@@ -66,25 +73,26 @@
     :style="{ width: '800px', minHeight: '200px' }">
     <CZPlayer />
   </n-modal>
+
+  <AutoCheck v-if="autoCheckVisible"/>
 </template>
 
 <script lang="ts" setup>
-// import 'vxe-table/lib/style.css'
-import { ref, unref, computed, watchEffect, onUnmounted, onMounted } from 'vue';
+import { AlarmSharp } from "@vicons/ionicons5"
+import { ref, unref, computed, watchEffect, onUnmounted } from 'vue';
 import { M3UObject } from "../../utils/file";
 import useM3uTable from "./hooks/m3utable";
 import CZPlayer from "@/components/CZPlayer.vue"
 import SideMenu from "./components/SideMenu.vue";
+import AutoCheck from "./components/AutoCheck.vue";
 import SearchM3u8 from "./components/SearchM3u8.vue";
 import DropFile from "./components/DropFile.vue";
 import IRightMenu from "./components/IRightMenu.vue";
 import Scan from "./components/Scan.vue";
 import ExportModal from "./components/ExportModal.vue";
 import SettingModal from "./components/SettingModal.vue";
-// import { VxeTable, VxeColumn } from "vxe-table";
 import { notification } from '@/utils/data';
 import { useCheck } from './hooks/videoCheck';
-import { useTheme } from '../../store/theme';
 import { useOriginData } from '@/store/originFormatData';
 import { handleUserGroup } from "@/utils/defaultGroup"
 import { useSearch } from '@/store/search';
@@ -95,6 +103,8 @@ defineOptions({
   name: "dashbord"
 })
 
+const sleepShow = ref(false)
+
 const search = useSearch()
 const video = useVideo()
 
@@ -103,6 +113,7 @@ const { originData } = useOriginData()
 const showScanVisible = ref(false);
 const showExportVisible = ref(false);
 const SettingModalVisible = ref(false)
+const autoCheckVisible = ref(false)
 
 
 //检测是否进行中
@@ -260,9 +271,10 @@ function loadSelfGroup() {
   })
 }
 
-// 皮肤
-const theme = useTheme()
-const chackWrapperColor = computed(() => theme.mode === "dark" ? "#203446" : "#20344660")
+// 自动检测
+function handleAutoCheck(){
+  autoCheckVisible.value = true
+}
 
 onDeactivated(() => {
   showExportVisible.value = false
@@ -307,26 +319,5 @@ onDeactivated(() => {
   // color: #ffffff !important;
   font-weight: 600;
   font-size: 16px;
-}
-
-.check-wrapper {
-  display: flex;
-  font-size: 16px;
-  background-color: v-bind(chackWrapperColor);
-  border-radius: 5px;
-  padding: 5px 15px;
-
-  .check-number {
-    flex-grow: 1;
-    display: flex;
-
-    span {
-      flex-basis: 200px;
-    }
-  }
-
-  .check-progress {
-    flex-basis: 200px;
-  }
 }
 </style>

@@ -1,5 +1,5 @@
 <template>
-  <n-button class="w-100" style="width: 200px" color="#8a2be2" ghost @click="handleSetting">
+  <n-button class="w-100" style="width: 200px" color="#8a2be2" text-color="#d5d5d6" ghost @click="handleSetting">
     <template #icon>
       <n-icon>
         <SettingsOutline />
@@ -7,7 +7,7 @@
     </template>
     超级设置
   </n-button>
-  <n-button class="w-100 mt-16" style="width: 200px" color="#8a2be2" ghost @click="changeFile">
+  <n-button class="w-100 mt-16" style="width: 200px" color="#8a2be2" text-color="#d5d5d6" ghost @click="changeFile">
     <template #icon>
       <n-icon>
         <VideocamOutlineIcon />
@@ -19,6 +19,7 @@
     class="w-100 mt-16"
     style="width: 200px"
     color="#8a2be2"
+    text-color="#d5d5d6"
     @click="$emit('check')"
     v-if="!process"
     :disabled="!isImport"
@@ -34,6 +35,7 @@
     class="w-100 mt-16"
     style="width: 200px"
     color="#8a2be2"
+    text-color="#d5d5d6"
     @click="$emit('cancel')"
     v-if="process"
   >
@@ -144,5 +146,9 @@ export default defineComponent({
 .btn-fixed {
   position: fixed;
   bottom: 10px;
+}
+
+:global(.n-button--disabled) {
+  opacity: 1!important;
 }
 </style>
