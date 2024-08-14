@@ -68,10 +68,6 @@ export function canUpload(str: string) {
 
 //防狼检测、用户健康检测, 无意义名称检测
 export function hasWolf(str: string) {
-    // 健康模式关闭状态，跳过检查
-    if (localStorage.getItem("_menu_wolf") == "false") {
-        return false
-    }
     let skip = false
 
     const contents = ['男', '女', 'sex', '肉', '乳', '色', '淫', '凌', '辱',
