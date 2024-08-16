@@ -184,7 +184,7 @@ export function getStreamInfo(data: string) {
             streamInfo.height = parseInt(size[1], 10)
 
             // 分辨率宽度太小，直接忽略
-            if(streamInfo.width < 1280 || streamInfo.height < 720) { // 忽略过低的分辨率视频
+            if(streamInfo.width <= 320 || streamInfo.height <= 320) { // 忽略过低的分辨率视频
                 return
             }
         }

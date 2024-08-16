@@ -34,12 +34,11 @@
         </div>
         <!-- 搜索 -->
         <div style="margin-top: 8px">
-          <SearchM3u8 @getM3u="importM3u" @autoCheck="handleAutoCheck"/>
+          <SearchM3u8 @getM3u="importM3u" ref="searchRef" @autoCheck="handleAutoCheck"/>
         </div>
 
         <IRightMenu @clear-list="m3uData = []" @clear-invalid="clearUnSuccessM3uData" @speed-order="rSpeedOrderBy"
-          @getM3u="importM3u" @open-scan="showScanVisible = true" @change-name="changeNewName" :row="right.row"
-          @load-self-group="loadSelfGroup">
+          @getM3u="importM3u" @open-scan="showScanVisible = true" @change-name="changeNewName" :row="right.row">
           <div style="margin-top: 8px;background-color:var(--n-color)">
             <n-data-table :columns="m3uColumns" :data="m3uData" :row-props="right.rowProps" :pagination="false"
               :min-height="`calc(100vh - 190px + ${search.open ? '25px' : '70px'})`"
@@ -94,7 +93,6 @@ import SettingModal from "./components/SettingModal.vue";
 import { notification } from '@/utils/data';
 import { useCheck } from './hooks/videoCheck';
 import { useOriginData } from '@/store/originFormatData';
-import { handleUserGroup } from "@/utils/defaultGroup"
 import { useSearch } from '@/store/search';
 import { useVideo } from '@/store/video';
 import { jsSleep } from '@/utils/util';
@@ -103,6 +101,7 @@ defineOptions({
   name: "dashbord"
 })
 
+const searchRef = ref()
 const sleepShow = ref(false)
 
 const search = useSearch()
@@ -140,13 +139,16 @@ const m3uCheckedNumbers = computed(() => {
 });
 
 watchEffect(() => {
-  //检测是否完成，设置完成
+  //检测是否完成，设置完成 autoCheckQueen 是0表示非自动检测
   if (m3uCheckedNumbers.value >= unref(m3uData).length) {
+    if(search.autoCheckQueen.length > 0){
+      unref(searchRef)?.changeSoso("auto check")
+    }
     checkProcess.value = false;
   }
 });
 //上传m3u文件
-function importM3u(data: M3UObject[], mode: "loacl" | "search") {
+function importM3u(data: M3UObject[], mode: "loacl" | "search" | "auto-check") {
   // 如果正在检测，则不允许添加
   if (data.length == 0) {
     notification.warning({
@@ -225,8 +227,15 @@ async function checkM3u() {
 
 //停止检测
 function cacelCheckM3u() {
+  search.autoCheckQueen.length = 0
   defaultCheck.stopCheck()
   checkProcess.value = false;
+}
+
+function handleAutoCheck(){
+  nextTick(()=>{
+    checkM3u()
+  })
 }
 
 // 离开页面停止检测
@@ -260,20 +269,6 @@ function changeNewName(row) {
       return
     }
   }
-}
-
-function loadSelfGroup() {
-  m3uData.value = [...unref(m3uData)].map(item => {
-    const groupName = handleUserGroup(item.name) || item.group
-    console.log(item.name, handleUserGroup(item.name))
-    item.group = groupName
-    return item
-  })
-}
-
-// 自动检测
-function handleAutoCheck(){
-  autoCheckVisible.value = true
 }
 
 onDeactivated(() => {

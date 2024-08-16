@@ -50,6 +50,9 @@ export interface M3UObject {
     ratio?: string;
     success?: boolean;
     fps?: number;
+    width?: number;
+    height?: number;
+    speed?: number;
 }
 
 

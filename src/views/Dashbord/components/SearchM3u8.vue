@@ -9,11 +9,12 @@
 </template>
 <script lang="ts" setup>
 import { ref } from 'vue';
-import { debounce } from "howtools";
+import { debounce, isString } from "howtools";
 import { useSearch } from '@/store/search';
 import axios from 'axios';
 import { message } from '@/utils/data';
 import { handleUserGroup } from '../../../utils/defaultGroup';
+
 const searchUrl = useSearch()
 const loading = ref(false);
 const searchValue = ref("");
@@ -22,31 +23,29 @@ const searchMode = ref("so"); // 搜索模式
 const emit = defineEmits()
 
 function preSearch(value: string) {
-  if(unref(searchMode) == "me" && value == "auto check") {
-    emit('autoCheck', true)
-    loading.value = false;
-    searchValue.value = ""
-    return
-  }
-
-  if (searchUrl.url) {
-    axios.get(`${searchUrl.getUrl}/v1/tv/json`, { params: { tvName: value, mode: unref(searchMode) } }).then(res => {
-      const json = res.data?.data || []
-      // 云端搜索追加分类
-      json.forEach(element => {
-        element.group = handleUserGroup(element.name)
+  return new Promise((resolve, reject) => {
+    if (searchUrl.url) {
+      axios.get(`${searchUrl.getUrl}/v1/tv/json`, { params: { tvName: value, mode: unref(searchMode) } }).then(res => {
+        const json = res.data?.data || []
+        // 云端搜索追加分类
+        json.forEach(element => {
+          element.group = handleUserGroup(element.name)
+        });
+        emit("getM3u", json, "search");
+        resolve(json)
+      }).catch(err => {
+        message.warning(err)
+        reject(err)
+      }).finally(() => {
+        loading.value = false;
+        searchValue.value = "";
       });
-      emit("getM3u", json, "search");
-    }).catch(err => {
-      message.warning(err)
-    }).finally(() => {
+    } else {
+      message.warning("请先设置搜索链接")
       loading.value = false;
-      searchValue.value = "";
-    });
-  } else {
-    message.warning("请先设置搜索链接")
-    loading.value = false;
-  }
+      reject()
+    }
+  })
 }
 
 const search = debounce(preSearch, 1500);
@@ -57,8 +56,46 @@ const changeSoso = (value: string) => {
     return;
   }
   loading.value = true;
-  search(value);
+
+  if (value == "auto check") {
+    loading.value = false;
+    searchValue.value = ""
+    // 没有对接数据先加载
+    if (searchUrl.autoCheckQueen.length == 0) {
+      searchUrl.loadAutoCheckData()
+    }
+    if (searchMode.value == "so") {
+      const tvName = searchUrl.getNext()
+      if (tvName && isString(tvName)) {
+        message.warning(`正在触发关键词：${(tvName as string).replace(/[\\|^|\+|\*|\.|\$]/mg, '')}`)
+        preSearch(tvName).then((res: any) => {
+          if (res.length == 0) {
+            const tvName = searchUrl.getNext()
+            if (tvName) {
+              changeSoso(tvName)
+            }
+            return
+          }
+
+          emit('autoCheck')
+        })
+      } else {
+        message.info("检测完成")
+      }
+    } else {
+      preSearch(value).then((res: any) => {
+        emit('autoCheck')
+      })
+    }
+    return
+  }
+
+  search(value)
 };
+
+defineExpose({
+  changeSoso
+})
 </script>
 
 <style lang="scss" scoped>

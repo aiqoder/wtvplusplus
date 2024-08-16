@@ -17,10 +17,10 @@
         <span class="line-check"></span>
         <span class="line-text">响应优先</span>
       </context-menu-item>
-      <context-menu-item @click="loadSelfGroup">
+      <!-- <context-menu-item @click="loadSelfGroup">
         <span class="line-check"></span>
         <span class="line-text">载入自定义分组</span>
-      </context-menu-item>
+      </context-menu-item> -->
       <context-menu-item @click="$emit('open-scan')">
         <span class="line-check"></span>
         <span class="line-text">扫源小助手</span>

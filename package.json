@@ -1,6 +1,6 @@
 {
   "name": "wtv-next",
-  "version": "1.1.5",
+  "version": "1.1.6",
   "main": "dist/main/index.cjs",
   "description": "wtv 工具箱",
   "author": "一个橙子pro <942242856@qq.com>",
@@ -75,6 +75,7 @@
     "vue-loading-overlay": "^6.0.4",
     "vue-router": "^4.4.0",
     "vue3-contextmenu": "^0.2.12",
-    "ws": "8.11.0"
+    "ws": "8.11.0",
+    "yaml": "^2.5.0"
   }
 }
