@@ -7,6 +7,7 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    NAlart: typeof import('naive-ui')['NAlart']
     NAlert: typeof import('naive-ui')['NAlert']
     NButton: typeof import('naive-ui')['NButton']
     NCheckbox: typeof import('naive-ui')['NCheckbox']
@@ -17,7 +18,6 @@ declare module 'vue' {
     NConfigProvider: typeof import('naive-ui')['NConfigProvider']
     NDataTable: typeof import('naive-ui')['NDataTable']
     NDialogProvider: typeof import('naive-ui')['NDialogProvider']
-    NDropdown: typeof import('naive-ui')['NDropdown']
     NForm: typeof import('naive-ui')['NForm']
     NFormItem: typeof import('naive-ui')['NFormItem']
     NH3: typeof import('naive-ui')['NH3']

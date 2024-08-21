@@ -71,7 +71,7 @@ export function hasWolf(str: string) {
     let skip = false
 
     const contents = ['男', '女', 'sex', '肉', '乳', '色', '淫', '凌', '辱',
-        '人', '性', '羞', '91', '麻豆', '妻', '爆', '肛', 'AV', '虐',
+        '人', '性', '羞', '91', '麻豆', '妻', '肛', 'AV', '虐',
         '裸', '幼', '骚', '情欲', '春药', '寂寞', '双飞', '妓',
         '老師', '老师', '艳遇', '湿身', '射', '车震', '吻', '足交']
     for (const content of contents) {
@@ -162,7 +162,10 @@ export function getStreamFFmpegArgs(url: string, codec = "h264") {
     ]
 }
 
-export function getStreamInfo(data: string) {
+/**
+ * strict 表示严格模式，严格模式下对源要求较高
+*/
+export function getStreamInfo(data: string, strict = true) {
     const streamInfo = {
         width: 0,
         height: 0,
@@ -170,9 +173,12 @@ export function getStreamInfo(data: string) {
         codec: "",
     }
 
-    if (data.indexOf("non-existing PPS 0 referenced") > -1) return
-    if (data.indexOf("decode_slice_header error") > -1) return
-    if (data.indexOf("no frame!") > -1) return
+    if (strict) {
+        if (data.indexOf("non-existing PPS 0 referenced") > -1) return
+        if (data.indexOf("decode_slice_header error") > -1) return
+        if (data.indexOf("no frame!") > -1) return
+    }
+
     if (data.indexOf("Video: png") > -1) return // 忽略图片
 
     if (data.indexOf('Stream #0') !== -1) {
@@ -183,9 +189,11 @@ export function getStreamInfo(data: string) {
             streamInfo.width = parseInt(size[0].substring(1), 10)
             streamInfo.height = parseInt(size[1], 10)
 
-            // 分辨率宽度太小，直接忽略
-            if(streamInfo.width <= 320 || streamInfo.height <= 320) { // 忽略过低的分辨率视频
-                return
+            if (strict) {
+                // 分辨率宽度太小，直接忽略
+                if (streamInfo.width <= 320 || streamInfo.height <= 320) { // 忽略过低的分辨率视频
+                    return
+                }
             }
         }
         let fps = data.match(/\d+ fps,/) as any

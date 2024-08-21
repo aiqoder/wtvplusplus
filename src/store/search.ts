@@ -7,6 +7,7 @@ export const useSearch = defineStore("search", {
   state: () => ({
     url: useLocalStorage("search-url", ""),
     open: useLocalStorage("open-search", false),
+    strict:  useLocalStorage("check-strict", true), // 是否严格模式
     autoCheckQueen: []
   }),
   getters: {

@@ -1,9 +1,15 @@
 <template>
     <n-form ref="formRef" :model="formModel" :rules="rules" label-placement="left" label-width="auto">
-        <n-form-item label="开启搜一搜">
+        <div class=" flex gap-4">
+            <n-form-item label="严格模式">
+                <n-switch size="small" v-model:value="search.strict" />
+            </n-form-item>
+            <span v-if="search.strict" class=" text-red mt-1">严格模式对音视频流的质量要求较高，可能造成大量源检测不通过 </span>
+        </div>
+        <n-form-item label="设置网关">
             <n-switch size="small" v-model:value="formModel.open" @update:value="changeSoso" />
         </n-form-item>
-        <div class=" flex flex-1">
+        <div class=" flex flex-1 gap-10">
             <n-form-item label="超级网关" v-if="formModel.open">
                 <n-input v-model:value="search.url" clearable placeholder="请输入超级网关" />
             </n-form-item>
@@ -58,7 +64,7 @@ function changeSoso(val: boolean) {
 
 function submit() {
     formRef.value?.validate((errors) => {
-        axios.get(`${search.url}/v1/tv/identify`,{ params: { password: formModel.password } }).then((res) => {
+        axios.get(`${search.url}/v1/tv/identify`, { params: { password: formModel.password } }).then((res) => {
             if (res.data) {
                 localStorage.setItem("rule_password", res.data.password)
                 search.open = formModel.open
