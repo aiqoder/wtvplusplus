@@ -182,6 +182,19 @@ export function getStreamInfo(data: string, strict = true) {
     if (data.indexOf("Video: png") > -1) return // 忽略图片
 
     if (data.indexOf('Stream #0') !== -1) {
+        // Duration: 00:00:31.07,
+        let duration = data.match(/Duration: (.*?),/)
+        if(duration !== null){
+            const durationStr = duration[1] || ""
+            const minute = durationStr.split(":")[1]
+            if(minute == "00"){
+                return undefined
+            }
+            // 小于30分钟直接判无效源
+            if(Number(minute) < 30) {
+                return undefined
+            }
+        }
         // console.log("getStreamInfo.mjs", data)
         let size = data.match(/, \d+x\d+/) as any
         if (size !== null) {

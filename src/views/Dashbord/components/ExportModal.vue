@@ -43,8 +43,8 @@
   </n-form>
   <div style="display: flex; justify-content: flex-end">
     <n-space>
-      <n-button round color="#8a2be2" @click="handleValidateButtonClick">导出到磁盘</n-button>
-      <n-button round color="#8a2be2" @click="handleValidateButtonClickClip">导出到剪贴板</n-button>
+      <n-button round color="#8a2be2" text-color="#FFF" @click="handleValidateButtonClick">导出到磁盘</n-button>
+      <n-button round color="#8a2be2" text-color="#FFF" @click="handleValidateButtonClickClip">导出到剪贴板</n-button>
     </n-space>
   </div>
 </template>
@@ -56,6 +56,7 @@ import { groupBy, map, uniqBy } from 'lodash';
 import { FormRules } from 'naive-ui';
 import { PropType } from 'vue';
 import { M3UObject } from '../../../utils/file';
+import { isString } from 'howtools';
 
 const formRef = shallowRef()
 const speed = useSpeed()
@@ -154,8 +155,14 @@ function exportM3u(_suffix: string, exportType: 'file' | 'clip' = 'file') {
       if (item === 0) return false
       if (item === 2) return undefined
     })
+    
+    const fixSpeed = (speed) => {
+      if(speed == "-1") return Infinity
+      if(isString(speed)) return Number(speed.replace("ms", ""))
+      return Infinity
+    }
     const exportData = props.data.filter(item => model.pixs.includes(item.ratio as string))
-      .filter(item => success.includes(item.success))
+      .filter(item => success.includes(item.success)).filter(item => fixSpeed(item.rSpeed) < model.speed)
 
     if (type === "m3u") {
       return _to_M3u(unref(exportData))
