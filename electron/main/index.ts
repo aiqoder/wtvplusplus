@@ -88,7 +88,7 @@ app.whenReady().then(() => {
   win?.show()
   setHeaders()
   // 创建一个websoket服务器
-  tryUsePort(10000, (port) => {
+  tryUsePort(13071, (port) => {
     console.log("===========> port", port + "")
     store.set("wsport", port+ "")
     const wss = new WebSocketServer({
