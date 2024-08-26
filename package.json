@@ -1,6 +1,6 @@
 {
   "name": "wtv-next",
-  "version": "1.1.7",
+  "version": "1.1.8",
   "main": "dist/main/index.cjs",
   "description": "wtv 工具箱",
   "author": "一个橙子pro <942242856@qq.com>",
@@ -67,6 +67,7 @@
     "howtools": "^0.2.4",
     "iconv-lite": "^0.6.3",
     "iptv-playlist-parser": "^0.13.0",
+    "m3u-parser-generator": "^2.0.0",
     "mitt": "^3.0.1",
     "mpegts.js": "^1.7.3",
     "naive-ui": "^2.39.0",

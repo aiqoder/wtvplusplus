@@ -88,21 +88,20 @@ app.whenReady().then(() => {
   win?.show()
   setHeaders()
   // 创建一个websoket服务器
-  tryUsePort(13071, (port) => {
-    console.log("===========> port", port + "")
-    store.set("wsport", port+ "")
-    const wss = new WebSocketServer({
-      port: port,
-    })
-
-    wss.on('connection', function connection(ws) {
-      ws.on('error', console.error);
-
-      ipcMain.on("main-exec-stram", (data) => {
-        ws.send(data);
-      })
-    });
+  const port = 10001
+  console.log("===========> port", port + "")
+  store.set("wsport", port + "")
+  const wss = new WebSocketServer({
+    port: port,
   })
+
+  wss.on('connection', function connection(ws) {
+    ws.on('error', console.error);
+
+    ipcMain.on("main-exec-stram", (data) => {
+      ws.send(data);
+    })
+  });
 })
 
 app.on('will-quit', () => {

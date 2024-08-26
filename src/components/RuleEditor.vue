@@ -10,6 +10,7 @@ import { EditorView } from "@codemirror/view"
 import { yaml } from "@codemirror/lang-yaml"
 import { oneDark } from '@codemirror/theme-one-dark'
 import { useCreateGroupDialog } from '@/store/createGroupDialog';
+import { message, notification } from '@/utils/data';
 const store = useCreateGroupDialog()
 const yamlEditor = ref()
 
@@ -26,7 +27,9 @@ async function initRuleEditorEntity(dom: HTMLDivElement) {
             EditorView.updateListener.of((v) => {
                 const load = () => {
                     store.rule = v.state.doc.toString()
-                    store.updateYaml(store.rule)
+                    store.updateYaml(store.rule).catch(err=>{
+                        message.error(err.response.data)
+                    })
                 }
 
                 if(!timer) {
