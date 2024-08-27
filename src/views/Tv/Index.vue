@@ -4,7 +4,7 @@
             <n-collapse arrow-placement="right" accordion>
                 <n-collapse-item :title="`【${g}】`" :name="g" v-for="(arr, g) in groups" :key="g">
                     <n-list hoverable clickable>
-                        <n-list-item v-for="a in arr" @click="handlePlay(a)"
+                        <n-list-item v-for="a in arr" @click="handleDeboucePlay(a)"
                             :class="{ 'color': currentName == a.name }">{{ a.name }}</n-list-item>
                     </n-list>
                 </n-collapse-item>
@@ -32,8 +32,8 @@ import axios from 'axios';
 import VideoPlayer from "./VideoPlayer.vue"
 import { useLoadingBar } from 'naive-ui';
 import { Warning } from "@vicons/ionicons5"
-import { useToggle } from '@vueuse/core'
-
+import { useDebounceFn, useToggle } from '@vueuse/core'
+import { debounce } from "lodash-es"
 const [failVisible, toogleFail] = useToggle()
 const failUrls = ref<any[]>([])
 
@@ -128,6 +128,8 @@ async function handlePlay(a) {
         msg.value = `没有找到合适的链接，请尝试别的链接`
     }
 }
+
+const handleDeboucePlay = debounce(handlePlay, 400)
 </script>
 <style lang="scss" scoped>
 .pd {
