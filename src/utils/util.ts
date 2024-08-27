@@ -186,12 +186,9 @@ export function getStreamInfo(data: string, strict = true) {
         let duration = data.match(/Duration: (.*?),/)
         if(duration !== null){
             const durationStr = duration[1] || ""
-            const minute = durationStr.split(":")[1]
-            if(minute == "00"){
-                return undefined
-            }
-            // 小于30分钟直接判无效源
-            if(Number(minute) < 30) {
+            const hour = durationStr.split(":")[0]
+            // 没有小时的直接判无效源
+            if(hour == "00") {
                 return undefined
             }
         }
