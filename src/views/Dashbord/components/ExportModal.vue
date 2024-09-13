@@ -157,13 +157,13 @@ function exportM3u(_suffix: string, exportType: 'file' | 'clip' = 'file') {
     })
     
     const fixSpeed = (speed) => {
-      if(speed == "-1") return Infinity
+      if(speed == "-1") return -1
       if(isString(speed)) return Number(speed.replace("ms", ""))
-      return Infinity
+      return -1
     }
     const exportData = props.data.filter(item => model.pixs.includes(item.ratio as string))
-      .filter(item => success.includes(item.success)).filter(item => fixSpeed(item.rSpeed) < model.speed)
-
+      .filter(item => success.includes(item.success)).filter(item => (model.speed > fixSpeed(item.rSpeed)))
+    debugger
     if (type === "m3u") {
       return _to_M3u(unref(exportData))
     } else if (type === "txt") {
