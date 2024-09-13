@@ -15,7 +15,7 @@ export function useCheck() {
       const start = new Date().getTime()
       window.eUtils.execPorcess({
         root: "ffmpeg/ffmpeg",
-        timeout: 30 * 1000,
+        timeout: 8 * 1000,
         args: `-hide_banner -i ${m3u8.url}`,
         name,
       }).then(response => {

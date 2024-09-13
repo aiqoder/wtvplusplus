@@ -3,8 +3,8 @@ import Layout from "@/components/Layout/Index.vue"
 import DashBoard from "@/views/Dashbord/Index.vue"
 import Create from "@/views/Create.vue"
 import Tv from "@/views/Tv/Index.vue"
-import Rule from "@/views/Rule/Index.vue"
-import SilentGuardian from "@/views/SilentGuardian.vue"
+// import Rule from "@/views/Rule/Index.vue"
+// import SilentGuardian from "@/views/SilentGuardian.vue"
 const router = createRouter({
   history: createWebHashHistory(),
   routes: [
@@ -38,14 +38,6 @@ const router = createRouter({
           component: Tv,
           meta: {
             title: '测试播放'
-          }
-        },
-        {
-          path: '/rule',
-          name: 'rule',
-          component: Rule,
-          meta: {
-            title: '规则引擎'
           }
         },
       ]

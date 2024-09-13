@@ -44,13 +44,6 @@ const meuns = computed(() => [
     show: search.open,
   },
   {
-    title: "规则引擎",
-    com: HighQualityOutlined,
-    key: "rule",
-    routerName: "rule",
-    show: search.open,
-  },
-  {
     title: "关于",
     com: EllipsisHorizontalSharp,
     key: "gy",
