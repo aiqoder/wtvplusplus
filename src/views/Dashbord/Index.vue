@@ -24,17 +24,18 @@
               ((m3uCheckedNumbers / (m3uData.length || 1)) * 100).toFixed(2)
             }}%</span>
           </div>
-          <div class=" w-8 cursor-pointer" v-show="sleepShow" @mouseover="sleepShow = true" @mouseleave="sleepShow = false">
-            <span >
+          <div class=" w-8 cursor-pointer" v-show="sleepShow" @mouseover="sleepShow = true"
+            @mouseleave="sleepShow = false">
+            <span>
               <n-icon size="1.2rem">
-                <AlarmSharp/>
+                <AlarmSharp />
               </n-icon>
             </span>
           </div>
         </div>
         <!-- 搜索 -->
         <div style="margin-top: 8px">
-          <SearchM3u8 @getM3u="importM3u" ref="searchRef" @autoCheck="handleAutoCheck"/>
+          <SearchM3u8 @getM3u="importM3u" ref="searchRef" @autoCheck="handleAutoCheck" />
         </div>
 
         <IRightMenu @clear-list="m3uData = []" @clear-invalid="clearUnSuccessM3uData" @speed-order="rSpeedOrderBy"
@@ -73,7 +74,7 @@
     <CZPlayer />
   </n-modal>
 
-  <AutoCheck v-if="autoCheckVisible"/>
+  <AutoCheck v-if="autoCheckVisible" />
 </template>
 
 <script lang="ts" setup>
@@ -141,7 +142,7 @@ const m3uCheckedNumbers = computed(() => {
 watchEffect(() => {
   //检测是否完成，设置完成 autoCheckQueen 是0表示非自动检测
   if (m3uCheckedNumbers.value >= unref(m3uData).length) {
-    if(search.autoCheckQueen.length > 0){
+    if (search.autoCheckQueen.length > 0) {
       unref(searchRef)?.changeSoso("auto check")
     }
     checkProcess.value = false;
@@ -189,7 +190,6 @@ async function checkM3u() {
   let checkCount = 0;
 
   for (const [index, m3u8] of unref(m3uData).entries()) {
-
     //当前检测的数量，大于5个则暂停检测, 停止1000ms继续进行
     if (checkCount > 5) {
       await jsSleep(1000)
@@ -221,7 +221,11 @@ async function checkM3u() {
     }).finally(() => {
       checkCount -= 1;
     })
-
+    // 原力链接检测
+    const lowUrl = m3u8.url.toLocaleLowerCase()
+    if (lowUrl.startsWith("p2p://") || lowUrl.startsWith("p8p://") || lowUrl.startsWith("mitv://")) {
+      await jsSleep(5000)
+    }
   }
 }
 
@@ -232,8 +236,8 @@ function cacelCheckM3u() {
   checkProcess.value = false;
 }
 
-function handleAutoCheck(){
-  nextTick(()=>{
+function handleAutoCheck() {
+  nextTick(() => {
     checkM3u()
   })
 }

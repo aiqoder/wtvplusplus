@@ -1,0 +1,259 @@
+#EXTM3U x-tvg-url=http://epg.51zmt.top:8000/cc.xml,http://epg.51zmt.top:8000/difang.xml
+#EXTINF:-1,陕西卫视[768*576]
+http://ottrrs.hl.chinamobile.com/PLTV/88888888/224/3221225625/index.m3u8
+#EXTINF:-1 tvg-id="陕西卫视" tvg-name="陕西卫视" group-title="",陕西卫视
+http://ottrrs.hl.chinamobile.com/PLTV/88888888/224/3221226457/index.m3u8
+#EXTINF:-1 tvg-id="陕西卫视" tvg-name="陕西卫视" group-title="",陕西卫视
+http://dbiptv.sn.chinamobile.com/PLTV/88888890/224/3221225821/index.m3u8
+#EXTINF:-1,「陕西」佛坪电视台
+http://[2409:8087:7002:20::3]/dbiptv.sn.chinamobile.com/PLTV/88888888/224/3221226454/index.m3u8
+#EXTINF:-1,陕西农林卫视
+http://live.0359tv.com/lsdream/ss4Lj11/live.m3u8
+#EXTINF:-1 tvg-id="陕西卫视" tvg-name="陕西卫视" group-title="",陕西卫视
+http://110.53.52.63:8888/newlive/live/hls/40/live.m3u8
+#EXTINF:-1,陕西公共频道
+http://[2409:8087:7001:20:2::3]:80/dbiptv.sn.chinamobile.com/PLTV/88888888/224/3221226361/1.m3u8
+#EXTINF:-1,陕西体育休闲
+http://[2409:8087:7001:20:2::3]:80/dbiptv.sn.chinamobile.com/PLTV/88888888/224/3221226363/1.m3u8
+#EXTINF:-1,陕西西部电影
+http://[2409:8087:7001:20:3::9]:80/dbiptv.sn.chinamobile.com/PLTV/88888888/224/3221226364/1.m3u8
+#EXTINF:-1,陕西新闻资讯
+http://[2409:8087:7001:20:3::2]:80/dbiptv.sn.chinamobile.com/PLTV/88888888/224/3221226357/1.m3u8
+#EXTINF:-1,陕西都市青春
+http://[2409:8087:7001:20:2::3]:80/dbiptv.sn.chinamobile.com/PLTV/88888888/224/3221226358/1.m3u8
+#EXTINF:-1,陕西生活频道
+http://[2409:8087:7001:20:3::6]:80/dbiptv.sn.chinamobile.com/PLTV/88888888/224/3221226359/1.m3u8
+#EXTINF:-1,陕西影视频道
+http://[2409:8087:7001:20:2::3]:80/dbiptv.sn.chinamobile.com/PLTV/88888888/224/3221226360/1.m3u8
+#EXTINF:-1 tvg-id="陕西卫视" tvg-name="陕西卫视" group-title="",陕西卫视
+http://[2409:8087:1a01:df::7005]:80/ottrrs.hl.chinamobile.com/PLTV/88888888/224/3221225625/index.m3u8
+#EXTINF:-1 tvg-id="陕西卫视" tvg-name="陕西卫视" group-title="",陕西卫视
+http://60.12.183.46:9901/tsfile/live/0118_1.m3u8?key=txiptv&playlive=0&authid=0
+#EXTINF:-1 tvg-id="陕西卫视" tvg-name="陕西卫视" group-title="",陕西卫视
+http://ottrrs.hl.chinamobile.com/PLTV/88888888/224/3221226457/index.m3u8$可回看
+#EXTINF:-1,陕西交通广播 FM91.6
+http://ls.qingting.fm/live/1601.m3u8
+#EXTINF:-1,陕西故事广播 AM603[0*0]
+http://ls.qingting.fm/live/1608.m3u8
+#EXTINF:-1,陕西都市广播-陕广新闻 FM101.8[0*0]
+http://ls.qingting.fm/live/1609.m3u8
+#EXTINF:-1,陕西体育休闲
+http://frp-fly.top:27209/proxy/742107634/742107634.m3u8
+#EXTINF:-1 tvg-id="陕西卫视" tvg-name="陕西卫视" group-title="",陕西卫视
+http://221.213.69.82:9901/tsfile/live/0140_1.m3u8?key=txiptv&playlive=0&authid=0
+#EXTINF:-1 tvg-id="陕西卫视" tvg-name="陕西卫视" group-title="",陕西卫视
+http://ynxsj.7766.org:9901/tsfile/live/0136_1.m3u8?key=txiptv
+#EXTINF:-1,陕西-榆林神木市大柳塔镇
+https://mlivewbndbd.a.bdydns.com/mlivewbnd/mlive_sls02_2/index.m3u8
+#EXTINF:-1,陕西音乐
+https://lhttp.qingting.fm/live/4873/64k.mp3
+#EXTINF:-1 tvg-id="陕西卫视" tvg-name="陕西卫视" group-title="",陕西卫视
+http://[2409:8087:1a0b:df::4002]:80/ottrrs.hl.chinamobile.com/PLTV/88888888/224/3221225625/index.m3u8
+#EXTINF:-1 tvg-id="陕西卫视" tvg-name="陕西卫视" group-title="",陕西卫视
+http://[2409:8087:5e00:24::1e]:6060/000000001000/1000000002000007495/1.m3u8
+#EXTINF:-1 tvg-id="陕西卫视" tvg-name="陕西卫视" group-title="",陕西卫视 HD
+https://itv.myxcwh.com:65535/086/330000/00086/000/36370/index.m3u8
+#EXTINF:-1,陕西体育休闲
+http://dbiptv.sn.chinamobile.com/PLTV/88888890/224/3221226363/index.m3u8
+#EXTINF:-1,陕西体育休闲
+http://211.137.115.109:80/gitv_live/G_SHANXI-7/G_SHANXI-7.m3u8?p=GITV&area=SAXYD
+#EXTINF:-1,陕西体育休闲
+http://[2409:8087:7004:20:1000::22]:6610/yinhe/2/ch00000090990000001594/index.m3u8?virtualDomain=yinhe.live_hls.zte.com&$SD
+#EXTINF:-1,陕西体育休闲
+http://111.20.35.107:6610/yinhe/2/ch00000090990000001594/index.m3u8?virtualDomain=yinhe.live_hls.zte.com
+#EXTINF:-1,陕西体育休闲
+http://111.20.33.93/PLTV/88888893/224/3221226363/index.m3u8
+#EXTINF:-1,陕西体育休闲 576
+http://111.20.105.60:6060/yinhe/2/ch00000090990000001594/index.m3u8?virtualDomain=yinhe.live_hls.zte.com
+#EXTINF:-1,陕西体育
+http://[2409:8087:7000:20:1000::22]:6060/yinhe/2/ch00000090990000001594/index.m3u8?virtualDomain=yinhe.live_hls.zte.com
+#EXTINF:-1,陕西体育休闲
+http://111.20.35.107:6610/yinhe/2/ch00000090990000001594/index.m3u8?virtualDomain=yinhe.live_hls.zte.com&IASHttpSessionId=
+#EXTINF:-1,陕西西安商务资讯
+http://39.134.19.57/PLTV/88888888/224/3221225989/index.m3u8
+#EXTINF:-1 tvg-id="陕西卫视" tvg-name="陕西卫视" group-title="",陕西卫视
+http://bjlive.u.pthv.gitv.tv:91/live/SXWS3-1500k/live.m3u8
+#EXTINF:-1 tvg-id="陕西卫视" tvg-name="陕西卫视" group-title="",陕西卫视
+http://[2409:8087:74d9:21::6]/270000001128/9900000026/index.m3u8
+#EXTINF:-1 tvg-id="陕西卫视" tvg-name="陕西卫视" group-title="",陕西卫视
+http://[2409:8087:74F1:0021::0008]/270000001322/69900158041111100000002220/index.m3u8
+#EXTINF:-1,陕西农林卫视-4M576
+http://gslbservzqhsw.itv.cmvideo.cn/1000000005000266003/index.m3u8?channel-id=ystenlive&Contentid=1000000005000266003&livemode=1&stbId=3
+#EXTINF:-1,[1024*576]陕西农林卫视
+http://gslbservzqhsw.itv.cmvideo.cn/0000000000001000/1000000005000266003/index.m3u8?livemode=1&stbId=10&channel-id=ystenlive&Contentid=1000000005000266003
+#EXTINF:-1,陕西都市青春
+http://dbiptv.sn.chinamobile.com/PLTV/88888890/224/3221226358/index.m3u8
+#EXTINF:-1,陕西都市青春
+http://111.20.35.107:6610/yinhe/2/ch00000090990000001593/index.m3u8?virtualDomain=yinhe.live_hls.zte.com&IASHttpSessionId=
+#EXTINF:-1,陕西都市青春
+http://111.20.35.107:6610/yinhe/2/ch00000090990000002937/index.m3u8?virtualDomain=yinhe.live_hls.zte.com
+#EXTINF:-1,陕西都市青春2
+http://111.20.105.60:6060/yinhe/2/ch00000090990000002937/index.m3u8?virtualDomain=yinhe.live_hls.zte.com
+#EXTINF:-1,陕西都市青春
+http://211.137.115.109:80/gitv_live/G_SHANXI-2/G_SHANXI-2.m3u8?p=GITV&area=SAXYD
+#EXTINF:-1,陕西都市青春
+http://[2409:8087:7000:20:1000::22]:6060/yinhe/2/ch00000090990000002937/index.m3u8?virtualDomain=yinhe.live_hls.zte.com
+#EXTINF:-1,陕西都市青春
+http://111.20.35.107:6610/yinhe/2/ch00000090990000001593/index.m3u8?virtualDomain=yinhe.live_hls.zte.com
+#EXTINF:-1,陕西都市青春
+http://39.134.24.194/PLTV/88888888/224/3221225999/index.m3u8
+#EXTINF:-1,陕西都市青春
+http://[2409:8087:7004:20:1000::22]:6610/yinhe/2/ch00000090990000001593/index.m3u8?virtualDomain=yinhe.live_hls.zte.com&$SD
+#EXTINF:-1,陕西都市青春[768*576]
+http://111.20.105.60:6060/yinhe/2/ch00000090990000001593?virtualDomain=yinhe.live_hls.zte.com
+#EXTINF:-1,陕西都市青春 576
+http://39.134.24.24/PLTV/88888888/224/3221225999/index.m3u8
+#EXTINF:-1 tvg-id="陕西卫视" tvg-name="陕西卫视" group-title="",陕西卫视
+http://220.164.192.48:50085/tsfile/live/0136_1.m3u8
+#EXTINF:-1,陕西新闻广播
+http://satellitepull.cnr.cn/live/wxsxxxwgb/playlist.m3u8
+#EXTINF:-1,陕西都市广播·陕广新闻
+http://satellitepull.cnr.cn/live/wxsxxdsgb/playlist.m3u8
+#EXTINF:-1,陕西渭南新闻
+https://ls.qingting.fm/live/5022388/64k.m3u8
+#EXTINF:-1 tvg-id="陕西卫视" tvg-name="陕西卫视" group-title="",陕西卫视SD
+http://[2409:8087:5e00:24::1e]:6060/200000001898/460000089800010113/1.m3u8
+#EXTINF:-1,「陕西」安康综合
+http://[2409:8087:7000:20::4]/dbiptv.sn.chinamobile.com/PLTV/88888890/224/3221226385/index.m3u8
+#EXTINF:-1,陕西西安樊川
+https://gctxyc.liveplay.myqcloud.com/gc/cntv506-zbzg_1_md.m3u8
+#EXTINF:-1,陕西-西安大雁塔
+https://gctxyc.liveplay.myqcloud.com/gc/hkylxs01_1/index.m3u8
+#EXTINF:-1,陕西青少广播·好听1055
+http://satellitepull.cnr.cn/live/wxsxxqcgb/playlist.m3u8
+#EXTINF:-1,陕西韩城交通音乐
+https://ls.qingting.fm/live/15318413/64k.m3u8
+#EXTINF:-1,陕西安康交通
+https://ls.qingting.fm/live/5021862/64k.m3u8
+#EXTINF:-1,陕西西安音乐广播
+https://lhttp.qingting.fm/live/1612/64k.mp3?Qt=52947e0ade57a09e4a1386d08f17b656
+#EXTINF:-1,陕西安康综合
+https://ls.qingting.fm/live/5021861/64k.m3u8
+#EXTINF:-1,陕西故事
+https://ls.qingting.fm/live/1608/64k.m3u8
+#EXTINF:-1,陕西农村广播 AM900
+http://ls.qingting.fm/live/1602.m3u8
+#EXTINF:-1,陕西戏曲广播 AM747
+http://ls.qingting.fm/live/1606.m3u8
+#EXTINF:-1,陕西购物
+http://frp-fly.top:27209/proxy/1183146985/1183146985.m3u8
+#EXTINF:-1,陕西农林
+http://frp-fly.top:27209/proxy/1359389546/1359389546.m3u8
+#EXTINF:-1,陕西交通广播
+http://satellitepull.cnr.cn/live/wxsxxjtgb/playlist.m3u8
+#EXTINF:-1,陕西洋县国宝朱鹮02
+http://gctxyc.liveplay.myqcloud.com/gc/zh02_1/index.m3u8
+#EXTINF:-1,陕西洋县国宝朱鹮03
+http://gctxyc.liveplay.myqcloud.com/gc/zh03_1/index.m3u8
+#EXTINF:-1,陕西春晚
+https://p2.bdstatic.com/rtmp.liveshow.lss-user.baidubce.com/live/stream_bduid_273017592_8984207694/merged_1707576906552_928771_21_23920.m3u8
+#EXTINF:-1,陕西音乐广播
+https://lhttp.qingting.fm/live/4873/64k.mp3?Qt=945e01e4dfc83449d9edc77e001e2c0c
+#EXTINF:-1,陕西乐家购物
+http://tvplay.lejogo.com/sxtv6/cnwest.m3u8
+#EXTINF:-1,陕西乐家购物
+http://tvplay.lejogo.com/sxtv6/cnwest.m3u8?auth_token=1909756800-20226157-2022618-ff6b71f2cbc1c9b95d91af67b1bac497
+#EXTINF:-1 tvg-id="陕西卫视" tvg-name="陕西卫视" group-title="",陕西卫视
+http://ottrrs.hl.chinamobile.com/PLTV/88888890/224/3221225625/index.m3u8|447
+#EXTINF:-1 tvg-id="陕西卫视" tvg-name="陕西卫视" group-title="",陕西卫视
+http://ottrrs.hl.chinamobile.com/PLTV/88888890/224/3221226457/index.m3u8|448
+#EXTINF:-1 tvg-id="陕西卫视" tvg-name="陕西卫视" group-title="",陕西卫视
+http://[2409:8087:5e00:24::1e]:6060/000000001000/1000000002000007495/1.m3u8$标清
+#EXTINF:-1 tvg-id="陕西卫视" tvg-name="陕西卫视" group-title="",陕西卫视
+http://39.134.65.2:80/wh7f454c46tw3141546647_-1528198028/ottrrs.hl.chinamobile.com/PLTV/88888888/224/3221225625/index.m3u8
+#EXTINF:-1 tvg-id="陕西卫视" tvg-name="陕西卫视" group-title="",陕西卫视
+http://39.135.133.157/ottrrs.hl.chinamobile.com/PLTV/88888888/224/3221225625/1.m3u8?IASHttpSessionId=RR&icpid=88888888&from=23&hms_devid=1247&online=1717736230&vqe=3
+#EXTINF:-1 tvg-id="陕西卫视" tvg-name="陕西卫视" group-title="",陕西卫视
+http://39.135.133.156:80/wh7f454c46tw1929055838_-1201046558/ottrrs.hl.chinamobile.com/PLTV/88888888/224/3221225625/index.m3u8?icpid=88888888&RTS=1714041772&from=23&hms_devid=1247&online=1714041772&vqe=3
+#EXTINF:-1 tvg-id="陕西卫视" tvg-name="陕西卫视" group-title="",陕西卫视
+http://ottrrs.hl.chinamobile.com/PLTV/88888888/224/3221226457/index.m3u8$黑龙江哈尔滨 移动
+#EXTINF:-1 tvg-id="陕西卫视" tvg-name="陕西卫视" group-title="",陕西卫视
+http://ottrrs.hl.chinamobile.com/PLTV/88888888/224/3221225625/index.m3u8$黑龙江哈尔滨 移动
+#EXTINF:-1 tvg-id="陕西卫视" tvg-name="陕西卫视" group-title="",陕西卫视
+http://[2409:8087:74d9:21::6]/270000001128/9900000026/index.m3u8$甘肃-74d9
+#EXTINF:-1 tvg-id="陕西卫视" tvg-name="陕西卫视" group-title="",陕西卫视
+http://1639.hsmedia.top:8080/newlive/live/hls/38/live.m3u8
+#EXTINF:-1,陕西卫视-4M576
+http://gslbservzqhsw.itv.cmvideo.cn/1000000002000007495/index.m3u8?channel-id=ystenlive&Contentid=1000000002000007495&livemode=1&stbId=3
+#EXTINF:-1,陕西卫视-4M540
+http://gslbservzqhsw.itv.cmvideo.cn/5000000006000040017/index.m3u8?channel-id=bestzb&Contentid=5000000006000040017&livemode=1&stbId=3
+#EXTINF:-1 tvg-id="陕西卫视" tvg-name="陕西卫视" group-title="",陕西卫视
+http://[2409:8087:74d9:21::4]/270000001128/index.m3u8?cmcc_cid=9900000026
+#EXTINF:-1 tvg-id="陕西卫视" tvg-name="陕西卫视" group-title="",陕西卫视
+http://video.qd.sdu.edu.cn/liverespath/ebc9ec3e297c071df95d759b6313b9d9dbc3dbda/5456d5077a-0-0-62be150158e9a98d82add3fd3c19a7ce/index.m3u8
+#EXTINF:-1 tvg-id="陕西卫视" tvg-name="陕西卫视" group-title="",陕西卫视
+http://ottrrs.hl.chinamobile.com/PLTV/88888888/224/3221226457/index.m3u8$可回
+#EXTINF:-1 tvg-id="陕西卫视" tvg-name="陕西卫视" group-title="",陕西卫视
+http://39.134.68.140:6610/PLTV/88888888/224/3221225625/index.m3u8?
+#EXTINF:-1 tvg-id="陕西卫视" tvg-name="陕西卫视" group-title="",陕西卫视
+http://39.134.68.140:6610/PLTV/88888888/224/3221226457/index.m3u8?
+#EXTINF:-1 tvg-id="陕西卫视" tvg-name="陕西卫视" group-title="",陕西卫视
+http://39.134.68.153:6610/PLTV/88888888/224/3221225625/index.m3u8?
+#EXTINF:-1 tvg-id="陕西卫视" tvg-name="陕西卫视" group-title="",陕西卫视
+http://39.134.68.175:6610/PLTV/88888888/224/3221225625/index.m3u8?
+#EXTINF:-1 tvg-id="陕西卫视" tvg-name="陕西卫视" group-title="",陕西卫视
+http://39.134.68.175:6610/PLTV/88888888/224/3221226457/index.m3u8?
+#EXTINF:-1 tvg-id="陕西卫视" tvg-name="陕西卫视" group-title="",陕西卫视
+http://39.134.68.138:6610/PLTV/88888888/224/3221226457/index.m3u8?
+#EXTINF:-1 tvg-id="陕西卫视" tvg-name="陕西卫视" group-title="",陕西卫视
+http://39.134.68.153:6610/PLTV/88888888/224/3221226457/index.m3u8?
+#EXTINF:-1 tvg-id="陕西卫视" tvg-name="陕西卫视" group-title="",陕西卫视
+http://www.wpfhome.cn:5555/udp/235.254.198.40:1436
+#EXTINF:-1 tvg-id="陕西卫视" tvg-name="陕西卫视" group-title="",陕西卫视
+http://39.134.68.142:6610/PLTV/88888888/224/3221225625/index.m3u8?
+#EXTINF:-1 tvg-id="陕西卫视" tvg-name="陕西卫视" group-title="",陕西卫视
+http://39.134.68.142:6610/PLTV/88888888/224/3221226457/index.m3u8?
+#EXTINF:-1 tvg-id="陕西卫视" tvg-name="陕西卫视" group-title="",陕西卫视
+http://39.134.68.158:6610/PLTV/88888888/224/3221225625/index.m3u8?
+#EXTINF:-1 tvg-id="陕西卫视" tvg-name="陕西卫视" group-title="",陕西卫视
+http://39.134.68.158:6610/PLTV/88888888/224/3221226457/index.m3u8?
+#EXTINF:-1 tvg-id="陕西卫视" tvg-name="陕西卫视" group-title="",陕西卫视
+http://39.134.68.138:6610/PLTV/88888888/224/3221225625/index.m3u8?
+#EXTINF:-1 tvg-id="陕西卫视" tvg-name="陕西卫视" group-title="",陕西卫视
+http://39.134.68.134:6610/PLTV/88888888/224/3221226457/index.m3u8?
+#EXTINF:-1 tvg-id="陕西卫视" tvg-name="陕西卫视" group-title="",陕西卫视
+http://39.134.68.133:6610/PLTV/88888888/224/3221225625/index.m3u8?
+#EXTINF:-1 tvg-id="陕西卫视" tvg-name="陕西卫视" group-title="",陕西卫视
+http://39.134.68.134:6610/PLTV/88888888/224/3221225625/index.m3u8?
+#EXTINF:-1 tvg-id="陕西卫视" tvg-name="陕西卫视" group-title="",陕西卫视
+http://39.134.68.168:6610/PLTV/88888888/224/3221225625/index.m3u8?
+#EXTINF:-1 tvg-id="陕西卫视" tvg-name="陕西卫视" group-title="",陕西卫视
+http://39.134.68.133:6610/PLTV/88888888/224/3221226457/index.m3u8?
+#EXTINF:-1 tvg-id="陕西卫视" tvg-name="陕西卫视" group-title="",陕西卫视
+http://39.134.68.168:6610/PLTV/88888888/224/3221226457/index.m3u8?
+#EXTINF:-1 tvg-id="陕西卫视" tvg-name="陕西卫视" group-title="",陕西卫视
+http://omnix.cn:4000/udp/225.1.8.154:8140
+#EXTINF:-1 tvg-id="陕西卫视" tvg-name="陕西卫视" group-title="",陕西卫视
+http://www.omnix.cn:4000/udp/225.1.8.154:8140
+#EXTINF:-1 tvg-id="陕西卫视" tvg-name="陕西卫视" group-title="",陕西卫视
+http://www.shizhan.love:8848/udp/239.49.0.233:8000
+#EXTINF:-1 tvg-id="陕西卫视" tvg-name="陕西卫视" group-title="",陕西卫视
+http://ynxsj.7766.org:9901/tsfile/live/0136_1.m3u8?key=txiptv&playlive=0&authid=0
+#EXTINF:-1 tvg-id="陕西卫视" tvg-name="陕西卫视" group-title="",陕西卫视
+http://sjx_jyas.x3322.net:8011/tsfile/live/0136_1.m3u8?key=txiptv&playlive=0&authid=0
+#EXTINF:-1 tvg-id="陕西卫视" tvg-name="陕西卫视" group-title="",陕西卫视
+http://[2409:8087:5e00:24::1e]:6060/000000001000/1000000002000007495/index.m3u8
+#EXTINF:-1 tvg-id="陕西卫视" tvg-name="陕西卫视" group-title="",陕西卫视
+http://satellitepull.cnr.cn/live/wxsxxws/playlist.m3u8
+#EXTINF:-1 tvg-id="陕西卫视" tvg-name="陕西卫视" group-title="",陕西卫视
+http://220.164.192.48:50085/tsfile/live/0136_1.m3u8?key=txiptv
+#EXTINF:-1 tvg-id="陕西卫视" tvg-name="陕西卫视" group-title="",陕西卫视
+http://api2.52tb.xyz/info?id=98&token=20230218zdxlqr
+#EXTINF:-1 tvg-id="陕西卫视" tvg-name="陕西卫视" group-title="",陕西卫视
+http://api2.52tb.xyz/info?id=47&token=20230218zdxlqr
+#EXTINF:-1 tvg-id="陕西卫视" tvg-name="陕西卫视" group-title="",陕西卫视
+http://intime.fun:22222/mgak/sxws
+#EXTINF:-1 tvg-id="陕西卫视" tvg-name="陕西卫视" group-title="",陕西卫视
+http://113.247.237.109:9901/tsfile/live/faacts/0136_1.m3u8?key=txiptv&playlive=1&down=1
+#EXTINF:-1 tvg-id="陕西卫视" tvg-name="陕西卫视" group-title="",陕西卫视
+http://221.213.69.82:9901/tsfile/live/0140_1.m3u8
+#EXTINF:-1 tvg-id="陕西卫视" tvg-name="陕西卫视" group-title="",陕西卫视
+http://113.247.237.110:9901/tsfile/live/faacts/0136_1.m3u8?key=txiptv&playlive=1&down=1
+#EXTINF:-1 tvg-id="陕西卫视" tvg-name="陕西卫视" group-title="",陕西卫视
+http://39.134.67.108/PLTV/88888888/224/3221225989/1.m3u8
+#EXTINF:-1,陕西交通广播
+https://satellitepull.cnr.cn/live/wxsxxjtgb/playlist.m3u8
+#EXTINF:-1,陕西经济广播·896汽车调频
+http://satellitepull.cnr.cn/live/wxsxxjjgb/playlist.m3u8
+#EXTINF:-1,陕西农村广播
+http://satellitepull.cnr.cn/live/wxsxxncgb/playlist.m3u8
