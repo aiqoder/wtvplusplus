@@ -184,12 +184,14 @@ export function getStreamInfo(data: string, strict = true) {
     if (data.indexOf('Stream #0') !== -1) {
         // Duration: 00:00:31.07,
         let duration = data.match(/Duration: (.*?),/)
-        if(duration !== null){
+        if (duration !== null) {
             const durationStr = duration[1] || ""
-            const hour = durationStr.split(":")[0]
-            // 没有小时的直接判无效源
-            if(hour == "00") {
-                return undefined
+            if (durationStr != "00:00:00.00") {
+                const hour = durationStr.split(":")[0]
+                // 没有小时的直接判无效源
+                if (hour == "00") {
+                    return undefined
+                }
             }
         }
         // console.log("getStreamInfo.mjs", data)

@@ -15,29 +15,29 @@ export function useCheck() {
       const start = new Date().getTime()
 
       // 原力链接检测
-      const lowUrl = m3u8.url.toLocaleLowerCase()
-      let isForceTv = false
-      let forceTvUrl = ""
-      if (lowUrl.startsWith("p2p://") || lowUrl.startsWith("p8p://") || lowUrl.startsWith("mitv://")) {
-        const sp = lowUrl.split("/")
-        const server = sp[2]
-        const channel = sp[3]
-        await window.eUtils.execPorcess({
-          root: "forcetv/forcetv.exe",
-          timeout: 10 * 1000,
-          args: `-s ${server} -c ${channel} -o ${port}`,
-          name: `forcetv-${name}`,
-        })
-        forceTvUrl = `http://127.0.0.1:9906/${channel}.ts`
-        isForceTv = true
-        port++
-        if (port > 9900) port = 9106
-      }
+      // const lowUrl = m3u8.url.toLocaleLowerCase()
+      // let isForceTv = false
+      // let forceTvUrl = ""
+      // if (lowUrl.startsWith("p2p://") || lowUrl.startsWith("p8p://") || lowUrl.startsWith("mitv://")) {
+      //   const sp = lowUrl.split("/")
+      //   const server = sp[2]
+      //   const channel = sp[3]
+      //   await window.eUtils.execPorcess({
+      //     root: "forcetv/forcetv.exe",
+      //     timeout: 10 * 1000,
+      //     args: `-s ${server} -c ${channel} -o ${port}`,
+      //     name: `forcetv-${name}`,
+      //   })
+      //   forceTvUrl = `http://127.0.0.1:9906/${channel}.ts`
+      //   isForceTv = true
+      //   port++
+      //   if (port > 9900) port = 9106
+      // }
 
       window.eUtils.execPorcess({
         root: "ffmpeg/ffmpeg",
-        timeout: isForceTv ? 4.5 * 1000 : 8 * 1000,
-        args: `-hide_banner -i ${isForceTv ? forceTvUrl : m3u8.url}`,
+        timeout: 8 * 1000,
+        args: `-hide_banner -i ${m3u8.url}`,
         name,
       }).then(response => {
         console.log(response.data)
@@ -52,11 +52,6 @@ export function useCheck() {
         }
       })
         .catch(reject)
-        .finally(() => {
-          if (isForceTv) {
-            window.eUtils.closePorcess(`forcetv-${name}`)
-          }
-        })
     })
   }
 
