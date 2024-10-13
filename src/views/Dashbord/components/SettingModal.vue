@@ -67,6 +67,7 @@ function submit() {
         axios.get(`${search.url}/v1/tv/identify`, { params: { password: formModel.password } }).then((res) => {
             if (res.data) {
                 localStorage.setItem("rule_password", res.data.password)
+                localStorage.setItem("auth", res.data.token)
                 search.open = formModel.open
                 message.success("验证成功")
             }
