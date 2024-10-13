@@ -11,6 +11,7 @@ import contextmenu from 'vue3-contextmenu'
 
 // eventbus
 import emitter from './utils/eventbus'
+import axios from 'axios'
 
 const app = createApp(App)
 
@@ -23,3 +24,24 @@ app.use(router)
 app.use(Directive)
 app.use(createPinia())
 app.mount('#app')
+
+const pwd = localStorage.getItem("__password_txt")
+const url = localStorage.getItem("search-url")
+
+if (pwd && url) {
+    axios.get(`${url}/v1/tv/identify`, { params: { password: pwd } }).then((res) => {
+        if (res.data) {
+            localStorage.setItem("rule_password", res.data.password)
+            localStorage.setItem("auth", res.data.token)
+        }
+    })
+}
+
+axios.interceptors.request.use((config: any) => {
+    config.headers["Authorization"] = localStorage.getItem("auth")
+
+    return config;
+},
+    (err) => {
+        console.log(err);
+    })
