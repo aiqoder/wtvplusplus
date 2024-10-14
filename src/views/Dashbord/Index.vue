@@ -10,6 +10,9 @@
           <p>1. 列表位置，点击右键发现更多功能</p>
           <p>2. 双击名称，删除这一行</p>
         </n-alert>
+        <div class=" text-gray pos-absolute pos-bottom-0 text-center w-full" v-if="network.status == 200">
+          <div>当前网络 ：{{ network.province }}-{{ network.isp }}</div>
+        </div>
       </n-layout-sider>
       <n-layout>
         <!-- 检测进度 -->
@@ -97,6 +100,8 @@ import { useOriginData } from '@/store/originFormatData';
 import { useSearch } from '@/store/search';
 import { useVideo } from '@/store/video';
 import { jsSleep } from '@/utils/util';
+import { useIntervalFn } from "@vueuse/core";
+import axios from "axios";
 
 defineOptions({
   name: "dashbord"
@@ -281,6 +286,27 @@ onDeactivated(() => {
   SettingModalVisible.value = false
   video.visible = false
 })
+
+const network = reactive({
+  status: 200,
+  isp: "",
+  province: ""
+})
+
+useIntervalFn(
+  () => {
+    axios.get("https://ip.yigechengzi.com").then(res => {
+      network.status = res.data?.code
+      network.isp = res.data?.data?.isp
+      network.province = res.data?.data?.province
+    }).catch(res => {
+      network.status = 500
+    })
+  },
+  60 * 1000,
+  {
+    immediateCallback: true,
+  })
 </script>
 <style>
 .n-table .success-row {

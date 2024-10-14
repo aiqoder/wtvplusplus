@@ -12,15 +12,8 @@
     </div>
   </div>
 </template>
-<script lang="ts">
-import { defineComponent } from "vue";
+<script lang="ts" setup>
 import MenusComponent from "./Menus.vue";
-// import { isMac } from "@/utils/util";
-export default defineComponent({
-  components: {
-    MenusComponent,
-  },
-});
 </script>
 
 <style lang="scss" scoped>
