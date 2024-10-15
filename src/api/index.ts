@@ -1,6 +1,7 @@
 import { M3UObject } from '@/utils/file';
 import createRequest from '../utils/request';
 import { hasWolf } from "../utils/util"
+import axios from 'axios';
 
 
 // ------------------------我的服务器API--------------------------------------
@@ -13,7 +14,7 @@ export function addTvs(data) {
     if (hasWolf(data.name)) return;
 
     
-    return createRequest({
+    return axios({
         url: `${baseUrl}/v1/tv/update`,
         data,
         method: "POST"
