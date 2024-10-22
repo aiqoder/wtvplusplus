@@ -83,6 +83,7 @@ const changeSoso = (value: string) => {
         message.info("检测完成")
       }
     } else {
+      searchUrl.autoSelfCheck = true
       preSearch(value).then((res: any) => {
         emit('autoCheck')
       })

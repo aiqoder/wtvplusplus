@@ -147,9 +147,10 @@ const m3uCheckedNumbers = computed(() => {
 watchEffect(() => {
   //检测是否完成，设置完成 autoCheckQueen 是0表示非自动检测
   if (m3uCheckedNumbers.value >= unref(m3uData).length) {
-    if (search.autoCheckQueen.length > 0) {
+    if (search.autoCheckQueen.length > 0 || search.autoSelfCheck) {
       unref(searchRef)?.changeSoso("auto check")
     }
+
     checkProcess.value = false;
   }
 });
@@ -173,6 +174,10 @@ function importM3u(data: M3UObject[], mode: "loacl" | "search" | "auto-check") {
     });
     return;
   }
+
+  // 导入移除自动检测特征
+  search.autoCheckQueen.length = 0
+  search.autoSelfCheck = false
 
   m3uData.value = data;
 
@@ -226,17 +231,18 @@ async function checkM3u() {
     }).finally(() => {
       checkCount -= 1;
     })
-    // 原力链接检测
-    const lowUrl = m3u8.url.toLocaleLowerCase()
-    if (lowUrl.startsWith("p2p://") || lowUrl.startsWith("p8p://") || lowUrl.startsWith("mitv://")) {
-      await jsSleep(5000)
-    }
+    // // 原力链接检测
+    // const lowUrl = m3u8.url.toLocaleLowerCase()
+    // if (lowUrl.startsWith("p2p://") || lowUrl.startsWith("p8p://") || lowUrl.startsWith("mitv://")) {
+    //   await jsSleep(5000)
+    // }
   }
 }
 
 //停止检测
 function cacelCheckM3u() {
   search.autoCheckQueen.length = 0
+  search.autoSelfCheck = false
   defaultCheck.stopCheck()
   checkProcess.value = false;
 }

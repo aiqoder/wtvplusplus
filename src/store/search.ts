@@ -8,7 +8,8 @@ export const useSearch = defineStore("search", {
     url: useLocalStorage("search-url", ""),
     open: useLocalStorage("open-search", false),
     strict:  useLocalStorage("check-strict", false), // 是否严格模式
-    autoCheckQueen: []
+    autoCheckQueen: [],
+    autoSelfCheck: false, // 自动检测库里面的数据
   }),
   getters: {
     isSearchOpen: (state) => state.open && state.url,
