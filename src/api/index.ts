@@ -27,3 +27,8 @@ export function addTvs(data) {
     })
 
 }
+
+export function getRule() {
+    const baseUrl = localStorage.getItem("search-url")
+    return axios.get(`${baseUrl}/v1/tv/rule/get`)
+}
