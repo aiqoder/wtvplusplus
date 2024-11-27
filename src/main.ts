@@ -38,7 +38,7 @@ if (pwd && url) {
 }
 
 axios.interceptors.request.use((config: any) => {
-    config.headers["Authorization"] = localStorage.getItem("auth")
+    config.headers["session-id"] = localStorage.getItem("auth")
 
     return config;
 },
