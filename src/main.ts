@@ -12,6 +12,7 @@ import contextmenu from 'vue3-contextmenu'
 // eventbus
 import emitter from './utils/eventbus'
 import axios from 'axios'
+import { getRule } from './api'
 
 const app = createApp(App)
 
@@ -33,6 +34,10 @@ if (pwd && url) {
         if (res.data) {
             localStorage.setItem("rule_password", res.data.password)
             localStorage.setItem("auth", res.data.token)
+
+            getRule().then(res=>{
+                localStorage.setItem("create-group-rule-yaml",res.data)
+            })
         }
     })
 }

@@ -57,7 +57,7 @@ const changeSoso = (value: string) => {
   }
   loading.value = true;
 
-  if (value == "auto check") {
+  if (value == "auto check" || value == "12345") {
     loading.value = false;
     searchValue.value = ""
     // 没有对接数据先加载

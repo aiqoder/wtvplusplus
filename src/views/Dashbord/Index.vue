@@ -94,7 +94,7 @@ import IRightMenu from "./components/IRightMenu.vue";
 import Scan from "./components/Scan.vue";
 import ExportModal from "./components/ExportModal.vue";
 import SettingModal from "./components/SettingModal.vue";
-import { notification } from '@/utils/data';
+import { message, notification } from '@/utils/data';
 import { useCheck } from './hooks/videoCheck';
 import { useOriginData } from '@/store/originFormatData';
 import { useSearch } from '@/store/search';
@@ -147,8 +147,10 @@ const m3uCheckedNumbers = computed(() => {
 watchEffect(() => {
   //检测是否完成，设置完成 autoCheckQueen 是0表示非自动检测
   if (m3uCheckedNumbers.value >= unref(m3uData).length) {
+    debugger
     if (search.autoCheckQueen.length > 0 || search.autoSelfCheck) {
       unref(searchRef)?.changeSoso("auto check")
+      return
     }
 
     checkProcess.value = false;
@@ -166,18 +168,21 @@ function importM3u(data: M3UObject[], mode: "loacl" | "search" | "auto-check") {
     return;
   }
   // 如果正在检测，则不允许添加
-  if (checkProcess.value) {
-    notification.error({
-      title: "提示！！",
-      content: "请先停止检测",
-      duration: 2500,
-    });
-    return;
+  if (!(search.autoSelfCheck || search.autoCheckQueen.length > 0)) {
+    if (checkProcess.value) {
+      notification.error({
+        title: "提示！！",
+        content: "请先停止检测",
+        duration: 2500,
+      });
+      return;
+    }
   }
 
+
   // 导入移除自动检测特征
-  search.autoCheckQueen.length = 0
-  search.autoSelfCheck = false
+  // search.autoCheckQueen.length = 0
+  // search.autoSelfCheck = false
 
   m3uData.value = data;
 
@@ -248,9 +253,10 @@ function cacelCheckM3u() {
 }
 
 function handleAutoCheck() {
-  nextTick(() => {
+  message.warning("凹凸检测正在热身，稍等一会...")
+  setTimeout(() => {
     checkM3u()
-  })
+  }, 6000)
 }
 
 // 离开页面停止检测
