@@ -80,14 +80,15 @@
         formRef.value?.validate((errors) => {
             axios.post(`${search.url}/user-api/v1/user/login`, { email: formModel.email, password: formModel.password }).then((res) => {
                 if (res.data?.code == 200) {
-                    localStorage.setItem("rule_password", res.data.password)
-                    localStorage.setItem("auth", res.data.token)
+                    localStorage.setItem("rule_password", res.data?.data?.password)
+                    localStorage.setItem("auth", res.data?.data?.token)
+
                     search.open = formModel.open
                     message.success("验证成功")
                 }else {
                     message.success(res.data?.msg)
                 }
-            }).catch(() => {
+            }).catch((err) => {
                 message.error("验证失败")
             })
 
