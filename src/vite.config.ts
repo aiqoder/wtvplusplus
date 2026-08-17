@@ -6,6 +6,19 @@ import { NaiveUiResolver } from 'unplugin-vue-components/resolvers'
 import UnoCSS from 'unocss/vite'
 import { createHtmlPlugin } from 'vite-plugin-html'
 import pkg from '../package.json'
+
+/** Prefer GitHub release / CI version, fall back to package.json. */
+function resolveAppVersion(): string {
+  const fromEnv =
+    process.env.APP_VERSION ||
+    process.env.VITE_APP_VERSION ||
+    (process.env.GITHUB_REF_TYPE === 'tag' ? process.env.GITHUB_REF_NAME : undefined)
+  if (fromEnv?.trim()) {
+    return fromEnv.trim().replace(/^v/i, '')
+  }
+  return pkg.version
+}
+
 // https://vitejs.dev/config/
 export default defineConfig({
   mode: process.env.NODE_ENV,
@@ -34,7 +47,7 @@ export default defineConfig({
     createHtmlPlugin({
       inject: {
         data: {
-          version: pkg.version,
+          version: resolveAppVersion(),
         },
       },
     })

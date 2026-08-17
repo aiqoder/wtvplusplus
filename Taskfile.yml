@@ -1,7 +1,7 @@
 version: '3'
 
 vars:
-  APP_NAME: "wtv"
+  APP_NAME: "wtv++"
   GOOS: '{{.GOOS | default OS}}'
 
 tasks:

@@ -18,10 +18,10 @@ import {
   Flash,
   EllipsisHorizontalSharp,
   TvSharp,
+  SettingsOutline,
 } from "@vicons/ionicons5";
 import { useRouter } from "vue-router";
 import { useSessionStorage } from '@vueuse/core';
-import HighQualityOutlined from "./menuSvg/HighQualityOutlined.vue"
 import { useThemeVars } from 'naive-ui';
 const router = useRouter();
 const themeVars = useThemeVars()
@@ -39,6 +39,13 @@ const meuns = computed(() => [
     com: TvSharp,
     key: "tv",
     routerName: "tv",
+    show: true,
+  },
+  {
+    title: "设置",
+    com: SettingsOutline,
+    key: "sz",
+    routerName: "settings",
     show: true,
   },
   {

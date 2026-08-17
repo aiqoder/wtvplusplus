@@ -12,12 +12,15 @@ import (
 var assets embed.FS
 
 func main() {
+	store := services.NewStoreService()
 	app := application.New(application.Options{
-		Name:        "wtv",
-		Description: "一个橙子pro工具箱",
+		Name:        "wtv++",
+		Description: "wtv++",
 		Services: []application.Service{
 			application.NewService(services.NewFileService()),
-			application.NewService(services.NewStoreService()),
+			application.NewService(store),
+			application.NewService(services.NewAIService(store)),
+			application.NewService(services.NewPlaylistService()),
 			application.NewService(services.NewFFmpegService()),
 			application.NewService(services.NewClipboardService()),
 		},
@@ -30,7 +33,7 @@ func main() {
 	})
 
 	app.Window.NewWithOptions(application.WebviewWindowOptions{
-		Title:            "一个橙子pro工具箱",
+		Title:            "wtv++",
 		Width:            1240,
 		Height:           700,
 		MinWidth:         375,

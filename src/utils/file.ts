@@ -1,5 +1,4 @@
 import { parse as m3u8Parse } from "iptv-playlist-parser";
-import { handleUserGroup } from "./defaultGroup";
 import { hasWolf } from "./util";
 
 export const isUrl = (url: string) => {
@@ -44,7 +43,7 @@ export interface M3UObject {
     id?: number,
     name: string;
     url: string;
-    group: string; // 智能分组
+    group: string; // 分组（优先 AI，导入时可覆盖）
     region: string;
     rSpeed?: string;
     ratio?: string;
@@ -65,7 +64,12 @@ export function readerHandleM3u(manifest: string) {
         if (hasWolf(item.name)) continue; //健康检测
         // tvg-id tvg-name tvg-logo group-title,CCTV2 财经
         if (!item.name || !item.url) continue;
-        _import_result.push({ name: item.name.replace(/tvg-(.*?) |group-title|,/g, '').trim(), url: item.url, region: "", group: item.group.title || handleUserGroup(item.name) });
+        _import_result.push({
+            name: item.name.replace(/tvg-(.*?) |group-title|,/g, '').trim(),
+            url: item.url,
+            region: "",
+            group: item.group?.title || "",
+        });
     }
     return _import_result
 }
@@ -85,7 +89,7 @@ export function readerHandleTxt(manifest: string) {
 
     //读取$结尾的网址 http://39.136.48.2:8089/PLTV/88888888/224/3221225859/index.m3u8$华东
     function _readerTextBy$(name: string, url: string) {
-        return { name, url: url.replace(/\$.*/, ""), region: "", group: lastGroup || handleUserGroup(name) }
+        return { name, url: url.replace(/\$.*/, ""), region: "", group: lastGroup || "" }
     }
 
     // 读取井号分割的数据
@@ -113,7 +117,7 @@ export function readerHandleTxt(manifest: string) {
         if (url.includes("#http")) {
             _import_result.push(..._readerTextByJing(name, url))
         } else if (isUrl(url.trim())) {// 正常URL导入
-            _import_result.push({ name, url: url.trim(), region: "", group: lastGroup || handleUserGroup(name) });
+            _import_result.push({ name, url: url.trim(), region: "", group: lastGroup || "" });
             // 井号分割导入
         } else if (url.match(/\$.*/)) {
             _import_result.push(_readerTextBy$(name, url))

@@ -5,10 +5,12 @@
 
       <n-layout-sider content-style="padding-right:24px;text-align:center;" width="230">
         <SideMenu @export="exportM3u()" @check="checkM3u" @cancel="cacelCheckM3u" @getM3u="importM3u"
-          :process="checkProcess" :isImport="m3uData.length > 0" @setting="SettingModalVisible = true" />
+          :process="checkProcess" :isImport="m3uData.length > 0" :canAIGroup="canAIGroup" :aiGrouping="aiGrouping"
+          @ai-group="handleAIGroup" @setting="SettingModalVisible = true" />
         <n-alert title="提示" type="info" class="mt-16" :show-icon="false">
           <p>1. 列表位置，点击右键发现更多功能</p>
           <p>2. 双击名称，删除这一行</p>
+          <p>3. 检测完成后可点击「AI分组」</p>
         </n-alert>
       </n-layout-sider>
       <n-layout>
@@ -62,8 +64,8 @@
     <ExportModal :data="m3uData" />
   </n-modal>
 
-  <!-- 域名设置 -->
-  <n-modal v-model:show="SettingModalVisible" :mask-closable="false" preset="card" title="超级设置"
+  <!-- 网关设置 -->
+  <n-modal v-model:show="SettingModalVisible" :mask-closable="false" preset="card" title="网关设置"
     :style="{ width: '700px', minHeight: '200px' }">
     <SettingModal />
   </n-modal>
@@ -75,6 +77,15 @@
   </n-modal>
 
   <AutoCheck v-if="autoCheckVisible" />
+
+  <AIGroupProgressModal
+    :show="aiGrouping"
+    :running="aiGrouping"
+    :done="aiGroupProgress.done"
+    :total="aiGroupProgress.total"
+    :message="aiGroupProgress.message"
+    @cancel="cancelAIGroup"
+  />
 </template>
 
 <script lang="ts" setup>
@@ -91,11 +102,13 @@ import IRightMenu from "./components/IRightMenu.vue";
 import Scan from "./components/Scan.vue";
 import ExportModal from "./components/ExportModal.vue";
 import SettingModal from "./components/SettingModal.vue";
+import AIGroupProgressModal from "@/components/AIGroupProgressModal.vue";
 import { message, notification } from '@/utils/data';
 import { useCheck } from './hooks/videoCheck';
 import { useOriginData } from '@/store/originFormatData';
 import { useSearch } from '@/store/search';
 import { useVideo } from '@/store/video';
+import { applyAIGroupToSuccess, stripGroupsOnImport } from '@/utils/aiGroup';
 defineOptions({
   name: "dashbord"
 })
@@ -112,6 +125,13 @@ const showScanVisible = ref(false);
 const showExportVisible = ref(false);
 const SettingModalVisible = ref(false)
 const autoCheckVisible = ref(false)
+const aiGrouping = ref(false)
+const aiGroupAbort = ref<AbortController | null>(null)
+const aiGroupProgress = reactive({
+  done: 0,
+  total: 0,
+  message: '',
+})
 
 
 //检测是否进行中
@@ -137,6 +157,11 @@ const m3uCheckedNumbers = computed(() => {
   ).length;
 });
 
+const canAIGroup = computed(() => {
+  if (checkProcess.value || aiGrouping.value) return false
+  return m3uData.value.some((item) => item.success === true)
+})
+
 watchEffect(() => {
   //检测是否完成，设置完成 autoCheckQueen 是0表示非自动检测
   if (m3uCheckedNumbers.value >= unref(m3uData).length) {
@@ -149,8 +174,8 @@ watchEffect(() => {
     checkProcess.value = false;
   }
 });
-//上传m3u文件
-function importM3u(data: M3UObject[], mode: "loacl" | "search" | "auto-check") {
+//上传m3u文件（导入时不做 AI 分组）
+async function importM3u(data: M3UObject[], mode: "loacl" | "search" | "auto-check") {
   // 如果正在检测，则不允许添加
   if (data.length == 0) {
     notification.warning({
@@ -172,15 +197,61 @@ function importM3u(data: M3UObject[], mode: "loacl" | "search" | "auto-check") {
     }
   }
 
-
-  // 导入移除自动检测特征
-  // search.autoCheckQueen.length = 0
-  // search.autoSelfCheck = false
-
-  m3uData.value = data;
+  aiGroupProgress.done = 0
+  aiGroupProgress.total = 0
+  aiGroupProgress.message = ''
+  // 「覆盖已有分组」开启时，导入即清除文件自带分组
+  m3uData.value = await stripGroupsOnImport(data);
 
   // 导入文件去除重复源
   removeDuplicationM3uData();
+}
+
+function cancelAIGroup() {
+  if (!aiGroupAbort.value) return
+  aiGroupProgress.message = '正在取消…'
+  aiGroupAbort.value.abort()
+}
+
+function refreshM3uList() {
+  // 触发表格重渲染，展示最新分组/名称
+  m3uData.value = m3uData.value.map((item) => ({ ...item }))
+}
+
+async function handleAIGroup() {
+  if (!canAIGroup.value) return
+  aiGrouping.value = true
+  aiGroupProgress.done = 0
+  aiGroupProgress.total = 0
+  aiGroupProgress.message = '准备 AI 分组…'
+  const controller = new AbortController()
+  aiGroupAbort.value = controller
+  try {
+    const { updated, cancelled } = await applyAIGroupToSuccess(m3uData.value, {
+      signal: controller.signal,
+      onProgress: (p) => {
+        aiGroupProgress.done = p.done
+        aiGroupProgress.total = p.total
+        aiGroupProgress.message = p.message
+      },
+    })
+    refreshM3uList()
+    if (cancelled) {
+      message.info(updated > 0 ? `已取消，已更新 ${updated} 条` : '已取消 AI 分组')
+    } else {
+      message.success(updated > 0 ? `AI 分组完成，更新 ${updated} 条` : '没有需要更新的分组')
+    }
+  } catch (err: any) {
+    refreshM3uList()
+    notification.warning({
+      title: "AI 分组失败",
+      content: err?.message || "请检查 AI 设置",
+      duration: 3500,
+    })
+  } finally {
+    aiGroupAbort.value = null
+    aiGrouping.value = false
+  }
 }
 
 //检测m3u文件
@@ -242,7 +313,10 @@ function handleAutoCheck() {
 }
 
 // 离开页面停止检测
-onUnmounted(() => cacelCheckM3u());
+onUnmounted(() => {
+  aiGroupAbort.value?.abort()
+  cacelCheckM3u()
+});
 
 function exportM3u() {
   if (m3uData.value.length == 0) {

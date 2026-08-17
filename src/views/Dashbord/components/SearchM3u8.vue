@@ -13,8 +13,6 @@ import { debounce, isString } from "howtools";
 import { useSearch } from '@/store/search';
 import axios from 'axios';
 import { message } from '@/utils/data';
-import { handleUserGroup } from '../../../utils/defaultGroup';
-
 const searchUrl = useSearch()
 const loading = ref(false);
 const searchValue = ref("");
@@ -27,9 +25,9 @@ function preSearch(value: string) {
     if (searchUrl.url) {
       axios.get(`${searchUrl.getUrl}/v1/tv/json`, { params: { tvName: value, mode: unref(searchMode) } }).then(res => {
         const json = res.data?.data || []
-        // 云端搜索追加分类
-        json.forEach(element => {
-          element.group = handleUserGroup(element.name)
+        // 分组交给导入流程中的 AI 处理
+        json.forEach((element: any) => {
+          element.group = element.group || ""
         });
         emit("getM3u", json, "search");
         resolve(json)

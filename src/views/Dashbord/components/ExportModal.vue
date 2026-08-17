@@ -149,7 +149,7 @@ function exportM3u(_suffix: string, exportType: 'file' | 'clip' = 'file') {
     return lines.join("\n")
   }
 
-  const title = "一个橙子pro_" + new Date().getTime() + `.${_suffix.replaceAll("-merge", "").replaceAll("-origin", "")}`;
+  const title = "wtv++_" + new Date().getTime() + `.${_suffix.replaceAll("-merge", "").replaceAll("-origin", "")}`;
   function getExportFunc(type: "m3u" | "txt" | "txt-merge") {
     const success = model.success.map(item => {
       if (item === 1) return true

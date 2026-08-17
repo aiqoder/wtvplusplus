@@ -5,7 +5,7 @@
         <SettingsOutline />
       </n-icon>
     </template>
-    超级设置
+    网关设置
   </n-button>
   <n-button class="w-100 mt-16" style="width: 200px" color="#8a2be2" text-color="#d5d5d6" ghost @click="changeFile">
     <template #icon>
@@ -49,6 +49,23 @@
   <n-button
     class="w-100 mt-16"
     style="width: 200px"
+    color="#8a2be2"
+    text-color="#d5d5d6"
+    ghost
+    :loading="aiGrouping"
+    :disabled="!canAIGroup || process"
+    @click="$emit('ai-group')"
+  >
+    <template #icon>
+      <n-icon>
+        <SparklesOutline />
+      </n-icon>
+    </template>
+    AI分组
+  </n-button>
+  <n-button
+    class="w-100 mt-16"
+    style="width: 200px"
     color="#ff69b4"
     @click="$emit('export', '')"
   >
@@ -70,7 +87,8 @@ import {
   ArrowUndoCircleSharp as ArrowUndoCircleSharpIcon,
   RemoveCircleOutline as RemoveCircleOutlineIcon,
   ShieldCheckmarkOutline as ShieldCheckmarkOutlineIcon,
-  SettingsOutline
+  SettingsOutline,
+  SparklesOutline,
 } from "@vicons/ionicons5";
 import { readerHandleTxt } from "@/utils/file";
 import { readerHandleM3u } from '../../../utils/file';
@@ -87,6 +105,14 @@ export default defineComponent({
       default: false,
       type: Boolean,
     },
+    canAIGroup: {
+      default: false,
+      type: Boolean,
+    },
+    aiGrouping: {
+      default: false,
+      type: Boolean,
+    },
   },
   emits: {
     getM3u: null,
@@ -95,6 +121,7 @@ export default defineComponent({
     exportM3u: null,
     export: null,
     setting: null,
+    'ai-group': null,
   },
   components: {
     SingleUpload,
@@ -105,6 +132,7 @@ export default defineComponent({
     RemoveCircleOutlineIcon,
     ShieldCheckmarkOutlineIcon,
     SettingsOutline,
+    SparklesOutline,
   },
   setup(props, { emit }) {
     const { importTxt, hasImport } = useOriginData()

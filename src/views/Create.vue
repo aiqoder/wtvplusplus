@@ -2,7 +2,7 @@
   <div class="container ">
     <n-h3> 说明 </n-h3>
     <n-p>
-      该软件基于 Wails 3 + Go + Vue3 + FFmpeg + mpegts 等技术栈实现，用于测试 FFmpeg 媒体处理能力，实现 RTSP、RTMP、HLS 等流转换并在 WebView 中播放。
+      本软件用于测试 FFmpeg 媒体处理能力，实现 RTSP、RTMP、HLS 等流转换并在 WebView 中播放。
     </n-p>
     <n-p>
       理论上支持海康、大华等摄像头视频流转化，并推送到web浏览器进行播放

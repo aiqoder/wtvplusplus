@@ -8,6 +8,18 @@ import UnoCSS from 'unocss/vite'
 import { createHtmlPlugin } from 'vite-plugin-html'
 import packageJSON from '../package.json'
 
+/** Prefer GitHub release / CI version, fall back to package.json. */
+function resolveAppVersion(): string {
+  const fromEnv =
+    process.env.APP_VERSION ||
+    process.env.VITE_APP_VERSION ||
+    (process.env.GITHUB_REF_TYPE === 'tag' ? process.env.GITHUB_REF_NAME : undefined)
+  if (fromEnv?.trim()) {
+    return fromEnv.trim().replace(/^v/i, '')
+  }
+  return packageJSON.version
+}
+
 export default defineConfig({
   root: path.resolve(__dirname, '../src'),
   resolve: { alias: { '@': path.resolve(__dirname, '../src') } },
@@ -17,7 +29,7 @@ export default defineConfig({
     AutoImport({ imports: ['vue'], dts: '../auto-import.d.ts' }),
     Components({ resolvers: [NaiveUiResolver()] }),
     createHtmlPlugin({
-      inject: { data: { version: packageJSON.version } },
+      inject: { data: { version: resolveAppVersion() } },
     }),
   ],
   base: './',

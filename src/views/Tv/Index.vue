@@ -3,6 +3,24 @@
         <div style="width: 200px;overflow: auto;">
             <n-collapse arrow-placement="right" accordion>
                 <n-collapse-item :title="`【${g}】`" :name="g" v-for="(arr, g) in groups" :key="g">
+                    <template v-if="g === '未知分组'" #header-extra>
+                        <n-button
+                            size="tiny"
+                            quaternary
+                            type="primary"
+                            :loading="aiGrouping"
+                            :disabled="!arr.length || aiGrouping"
+                            title="对未知分组进行 AI 分组"
+                            @click.stop="handleAIGroupUnknown"
+                        >
+                            <template #icon>
+                                <n-icon>
+                                    <SparklesOutline />
+                                </n-icon>
+                            </template>
+                            AI
+                        </n-button>
+                    </template>
                     <n-list hoverable clickable>
                         <n-list-item v-for="a in arr" @click="handleDeboucePlay(a)"
                             :class="{ 'color': currentName == a.name }">{{ a.name }}</n-list-item>
@@ -23,68 +41,124 @@
             </div>
             <VideoPlayer :url="currentUrl" :info="currentInfo" />
         </div>
+
+        <AIGroupProgressModal
+            :show="aiGrouping"
+            :running="aiGrouping"
+            :done="aiGroupProgress.done"
+            :total="aiGroupProgress.total"
+            :message="aiGroupProgress.message"
+            @cancel="cancelAIGroup"
+        />
     </div>
 </template>
 <script setup lang="ts">
-import { isUrl } from '@/utils/file';
-import { getVideoInfo } from '@/api/native';
-import axios from 'axios';
+import { getVideoInfo, listPlaylistGrouped } from '@/api/native'
 import VideoPlayer from "./VideoPlayer.vue"
-import { useLoadingBar } from 'naive-ui';
-import { Warning } from "@vicons/ionicons5"
-import { useDebounceFn, useToggle } from '@vueuse/core'
+import AIGroupProgressModal from '@/components/AIGroupProgressModal.vue'
+import { useLoadingBar, useMessage, useNotification } from 'naive-ui'
+import { Warning, SparklesOutline } from "@vicons/ionicons5"
+import { useToggle } from '@vueuse/core'
 import { debounce } from "lodash-es"
+import { applyAIGroupToUnknown } from '@/utils/aiGroup'
+
 const [failVisible, toogleFail] = useToggle()
 const failUrls = ref<any[]>([])
 
 const loadingBar = useLoadingBar()
-const baseUrl = localStorage.getItem("search-url")
+const message = useMessage()
+const notification = useNotification()
 const msg = ref("")
-type IGroup = {
-    group: string;
-    child: {
-        name: string;
-        url: string;
-    }[]
-}
-const groups = ref<IGroup>()
+const groups = ref<Record<string, { name: string; url: string }[]>>({})
 const currentName = ref()
+const aiGrouping = ref(false)
+const aiGroupAbort = ref<AbortController | null>(null)
+const aiGroupProgress = reactive({
+    done: 0,
+    total: 0,
+    message: '',
+})
 
-onMounted(() => {
+async function loadGroups() {
+    const list = await listPlaylistGrouped()
+    const xgroup: Record<string, { name: string; url: string }[]> = {}
+    for (const g of list || []) {
+        xgroup[g.group] = (g.items || []).map((item) => ({
+            name: item.name,
+            url: item.url,
+        }))
+    }
+    groups.value = xgroup
+}
+
+onMounted(async () => {
     loadingBar.start()
-    axios.get(`${baseUrl}/v1/tv/super`, { params: { password: localStorage.getItem("rule_password") } }).then(res => {
-        const manifest = res.data || ""
-
-        const xgroup: any = {}
-
-        const results = manifest?.split("\n") || [];
-        let lastGroup: undefined | string = undefined // 用于记录导入的节目分组内容
-
-        for (const item of results) {
-            // 检查分组内容，并设置最后一次的分组名称
-            if (item.trim().endsWith("#genre#")) {
-                lastGroup = item.trim().split(",")[0]
-                if (lastGroup && !xgroup[lastGroup]) xgroup[lastGroup] = []
-            }
-            const [name, url] = item.replaceAll("\r", "").split(",");
-            if (!name || !url) continue;
-
-            if (isUrl(url) && lastGroup) {
-                xgroup[lastGroup].push({ name: name, url: url })
-            }
-        }
-        groups.value = xgroup
+    try {
+        await loadGroups()
+    } catch (err: any) {
+        msg.value = err?.message || '加载播放列表失败'
+    } finally {
         loadingBar.finish()
-    })
+    }
 })
 
 onUnmounted(() => {
+    aiGroupAbort.value?.abort()
     loadingBar.finish()
 })
 
 
 const currentUrl = ref()
 const currentInfo = ref({})
+
+function cancelAIGroup() {
+    if (!aiGroupAbort.value) return
+    aiGroupProgress.message = '正在取消…'
+    aiGroupAbort.value.abort()
+}
+
+async function handleAIGroupUnknown(e?: Event) {
+    e?.stopPropagation?.()
+    const unknownItems = groups.value['未知分组'] || []
+    if (!unknownItems.length || aiGrouping.value) return
+
+    aiGrouping.value = true
+    aiGroupProgress.done = 0
+    aiGroupProgress.total = 0
+    aiGroupProgress.message = '准备 AI 分组…'
+    const controller = new AbortController()
+    aiGroupAbort.value = controller
+
+    try {
+        const { updated, cancelled } = await applyAIGroupToUnknown(
+            unknownItems.map((item) => ({ ...item, group: '未知分组' })),
+            {
+                signal: controller.signal,
+                onProgress: (p) => {
+                    aiGroupProgress.done = p.done
+                    aiGroupProgress.total = p.total
+                    aiGroupProgress.message = p.message
+                },
+            },
+        )
+        await loadGroups()
+        if (cancelled) {
+            message.info(updated > 0 ? `已取消，已更新 ${updated} 条` : '已取消 AI 分组')
+        } else {
+            message.success(updated > 0 ? `AI 分组完成，更新 ${updated} 条` : '没有需要更新的分组')
+        }
+    } catch (err: any) {
+        await loadGroups().catch(() => {})
+        notification.warning({
+            title: 'AI 分组失败',
+            content: err?.message || '请检查 AI 设置',
+            duration: 3500,
+        })
+    } finally {
+        aiGroupAbort.value = null
+        aiGrouping.value = false
+    }
+}
 
 async function handlePlay(a) {
     currentName.value = a.name
@@ -153,7 +227,7 @@ const handleDeboucePlay = debounce(handlePlay, 400)
 }
 
 .bg-black {
-    background-color: black;
+    background: black;
     min-height: 100%;
 }
 

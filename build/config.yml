@@ -2,12 +2,12 @@ version: '3'
 
 info:
   companyName: "一个橙子pro"
-  productName: "wtv"
+  productName: "wtv++"
   productIdentifier: "com.yigechengzipro.wtv"
-  description: "一个橙子pro工具箱"
+  description: "wtv++"
   copyright: "(c) 2026, 一个橙子pro"
   comments: "Wails 3 desktop application"
-  version: "1.4.0"
+  version: "3.0.0"
 
 dev_mode:
   root_path: .

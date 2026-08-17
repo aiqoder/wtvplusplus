@@ -3,6 +3,7 @@ import Layout from "@/components/Layout/Index.vue"
 import DashBoard from "@/views/Dashbord/Index.vue"
 import Create from "@/views/Create.vue"
 import Tv from "@/views/Tv/Index.vue"
+import Settings from "@/views/Settings/Index.vue"
 // import Rule from "@/views/Rule/Index.vue"
 // import SilentGuardian from "@/views/SilentGuardian.vue"
 const router = createRouter({
@@ -37,7 +38,15 @@ const router = createRouter({
           name: 'tv',
           component: Tv,
           meta: {
-            title: '测试播放'
+            title: '播放'
+          }
+        },
+        {
+          path: '/settings',
+          name: 'settings',
+          component: Settings,
+          meta: {
+            title: '系统设置'
           }
         },
       ]

@@ -1,4 +1,4 @@
-# wtv
+# wtv++
 
 🥳 Really simple `Electron` + `Vue` + `Vite` boilerplate.
 
@@ -23,10 +23,10 @@
 
 ```sh
 # clone the project
-git clone https://github.com/electron-vite/electron-vite-vue.git
+git clone https://github.com/aiqoder/wtvplusplus.git
 
 # enter the project directory
-cd electron-vite-vue
+cd wtvplusplus
 
 # install dependency
 npm install
