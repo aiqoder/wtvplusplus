@@ -32,7 +32,9 @@ yarn.lock
 # Wails and Go
 bin
 build/bin
+*.syso
 *.test
+dist
 
 # Wails frontend source asset directory (generated files inside are required
 # by Go embed; only its generated build output should be ignored elsewhere).

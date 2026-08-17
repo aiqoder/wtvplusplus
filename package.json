@@ -23,7 +23,8 @@
     "dev": "wails3 dev -config build/config.yml",
     "dev:wails:frontend": "vite --config frontend/vite.config.ts",
     "build:wails:frontend": "vite build --config frontend/vite.config.ts",
-    "build:wails": "npm run build:wails:frontend && wails3 generate bindings && wails3 build"
+    "build:wails": "npm run build:wails:frontend && wails3 generate bindings && task generate:icons && wails3 build",
+    "generate:icons": "task generate:icons"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.0.4",

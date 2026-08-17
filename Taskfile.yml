@@ -1,10 +1,23 @@
 version: '3'
 
 vars:
-  APP_NAME: "wtv++"
+  APP_NAME: "wtvplusplus"
+  PRODUCT_NAME: "wtv++"
+  BIN_NAME: "wtvplusplus"
   GOOS: '{{.GOOS | default OS}}'
+  ARCH: '{{.ARCH | default ARCH}}'
 
 tasks:
+  generate:icons:
+    summary: 从 icons/wtv.png 生成 Windows/macOS/Linux 图标资源
+    cmds:
+      - mkdir -p build/darwin build/windows build/linux
+      - cp icons/wtv.png build/appicon.png
+      - cp icons/wtv.png build/linux/wtvplusplus.png
+      - wails3 generate icons -input icons/wtv.png -macfilename build/darwin/icons.icns -windowsfilename build/windows/icon.ico
+      - cp build/windows/icon.ico icons/wtv.ico
+      - cp build/windows/icon.ico src/public/favicon.ico
+
   build:
     summary: Builds the Wails application
     cmds:
@@ -21,20 +34,63 @@ tasks:
       - task: "{{.GOOS}}:run"
 
   darwin:build:
+    deps:
+      - generate:icons
     cmds:
       - npm run build:wails:frontend
       - mkdir -p bin
       - mkdir -p bin/ffmpeg/lib
       - cp native/ffmpeg/lib/*.dylib bin/ffmpeg/lib/
-      - go build -o bin/wtv .
-      - install_name_tool -delete_rpath @executable_path/ffmpeg/lib bin/wtv 2>/dev/null || true
-      - install_name_tool -add_rpath @executable_path/ffmpeg/lib bin/wtv
+      - go build -o bin/{{.BIN_NAME}} .
+      - install_name_tool -delete_rpath @executable_path/ffmpeg/lib bin/{{.BIN_NAME}} 2>/dev/null || true
+      - install_name_tool -add_rpath @executable_path/ffmpeg/lib bin/{{.BIN_NAME}}
 
   darwin:package:
     cmds:
       - task: darwin:build
+      - VERSION="${APP_VERSION:-3.0.0}" APP_NAME="{{.BIN_NAME}}" PRODUCT_NAME="{{.PRODUCT_NAME}}" bash scripts/package-macos.sh
 
   darwin:run:
     cmds:
       - task: darwin:build
-      - ./bin/wtv
+      - ./bin/{{.BIN_NAME}}
+
+  windows:build:
+    deps:
+      - generate:icons
+    cmds:
+      - npm run build:wails:frontend
+      - mkdir -p bin
+      - wails3 generate syso -arch {{.ARCH}} -icon build/windows/icon.ico -manifest build/windows/wails.exe.manifest -info build/windows/info.json -out wails_windows_{{.ARCH}}.syso
+      - go build -tags production -ldflags="-w -s -H windowsgui" -o bin/{{.BIN_NAME}}.exe .
+      - rm -f wails_windows_*.syso
+
+  windows:package:
+    cmds:
+      - task: windows:build
+      - VERSION="${APP_VERSION:-3.0.0}" APP_NAME="{{.BIN_NAME}}" GOARCH="{{.ARCH}}" bash scripts/package-windows.sh
+
+  windows:run:
+    cmds:
+      - task: windows:build
+      - ./bin/{{.BIN_NAME}}.exe
+
+  linux:build:
+    deps:
+      - generate:icons
+    cmds:
+      - npm run build:wails:frontend
+      - mkdir -p bin
+      - go build -o bin/{{.BIN_NAME}} .
+      - cp build/appicon.png bin/wtvplusplus.png
+      - cp build/linux/wtvplusplus.desktop bin/wtvplusplus.desktop
+
+  linux:package:
+    cmds:
+      - task: linux:build
+      - VERSION="${APP_VERSION:-3.0.0}" APP_NAME="{{.BIN_NAME}}" GOARCH="{{.ARCH}}" bash scripts/package-linux.sh
+
+  linux:run:
+    cmds:
+      - task: linux:build
+      - ./bin/{{.BIN_NAME}}

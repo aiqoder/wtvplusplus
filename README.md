@@ -1,52 +1,42 @@
 # wtv++
 
-🥳 Really simple `Electron` + `Vue` + `Vite` boilerplate.
+一个面向直播源整理与播放的桌面工具：导入列表、批量检测可用性、AI 智能分组，并直接在线观看。
 
-<!-- [![awesome-vite](https://awesome.re/mentioned-badge.svg)](https://github.com/vitejs/awesome-vite) -->
-<!-- [![Netlify Status](https://api.netlify.com/api/v1/badges/ae3863e3-1aec-4eb1-8f9f-1890af56929d/deploy-status)](https://app.netlify.com/sites/electron-vite/deploys) -->
-<!-- [![GitHub license](https://img.shields.io/github/license/caoxiemeihao/electron-vite-vue)](https://github.com/electron-vite/electron-vite-vue/blob/main/LICENSE) -->
-<!-- [![GitHub stars](https://img.shields.io/github/stars/caoxiemeihao/electron-vite-vue?color=fa6470)](https://github.com/electron-vite/electron-vite-vue) -->
-<!-- [![GitHub forks](https://img.shields.io/github/forks/caoxiemeihao/electron-vite-vue)](https://github.com/electron-vite/electron-vite-vue) -->
-[![GitHub Build](https://github.com/electron-vite/electron-vite-vue/actions/workflows/build.yml/badge.svg)](https://github.com/electron-vite/electron-vite-vue/actions/workflows/build.yml)
-[![GitHub Discord](https://img.shields.io/badge/chat-discord-blue?logo=discord)](https://discord.gg/sRqjYpEAUK)
+## 功能概览
 
-## Features
+- **检测**：导入 m3u / txt 直播源，批量检测是否可用，查看码率、分辨率、响应速度等信息
+- **播放**：按分组浏览可用频道，一键在线播放
+- **AI 分组**：根据规则自动整理频道名称与分组，也可自定义分组规则
+- **导出**：按状态、分辨率等条件导出整理后的列表
 
-📦 Out of the box  
-🎯 Based on the official [template-vue-ts](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-vue-ts), less invasive  
-🌱 Extensible, really simple directory structure  
-💪 Support using Node.js API in Electron-Renderer  
-🔩 Support C/C++ native addons  
-🖥 It's easy to implement multiple windows  
+## 界面预览
 
-## Quick Setup
+### 检测
 
-```sh
-# clone the project
-git clone https://github.com/aiqoder/wtvplusplus.git
+导入直播源后批量检测可用性，支持 AI 分组与导出。
 
-# enter the project directory
-cd wtvplusplus
+![检测](shotscreen/检测.png)
 
-# install dependency
-npm install
+### 播放
 
-# develop
-npm run dev
-```
+按分组选择频道，直接在线观看。
 
-## 技术栈
+![播放](shotscreen/播放.png)
 
-- Wails 3
-- Go
-- Vue 3
-- FFmpeg 原生库（macOS 通过 cgo 接入）
+### 设置
 
-## 构建
+配置通用选项、AI 接口，以及自定义 AI 分组规则。
 
-```bash
-npm install
-npm run build:wails
-```
+![设置](shotscreen/设置.png)
 
-详细迁移说明见 `WAILS.md`。
+## 简单上手
+
+1. 打开「检测」，选择本地的 m3u / txt 文件导入
+2. 点击「开始检测」，等待结果（可随时停止）
+3. 检测完成后可使用「AI 分组」整理频道
+4. 在「播放」中观看可用频道，或在「检测」页导出列表
+5. 需要自定义分组规则时，前往「设置」进行调整
+
+## 关于
+
+项目地址：[https://github.com/aiqoder/wtvplusplus](https://github.com/aiqoder/wtvplusplus)

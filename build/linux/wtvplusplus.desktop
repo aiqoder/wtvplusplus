@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=wtv++
+GenericName=wtv++
+Comment=IPTV 直播源检测与管理工具
+Exec=wtvplusplus %U
+Icon=wtvplusplus
+Terminal=false
+Categories=AudioVideo;Network;Utility;
+StartupWMClass=wtvplusplus

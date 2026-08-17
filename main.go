@@ -11,11 +11,15 @@ import (
 //go:embed all:frontend/dist
 var assets embed.FS
 
+//go:embed icons/wtv.png
+var appIcon []byte
+
 func main() {
 	store := services.NewStoreService()
 	app := application.New(application.Options{
 		Name:        "wtv++",
 		Description: "wtv++",
+		Icon:        appIcon,
 		Services: []application.Service{
 			application.NewService(services.NewFileService()),
 			application.NewService(store),

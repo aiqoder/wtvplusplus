@@ -1,0 +1,15 @@
+{
+	"fixed": {
+		"file_version": "3.0.0"
+	},
+	"info": {
+		"0000": {
+			"ProductVersion": "3.0.0",
+			"CompanyName": "一个橙子pro",
+			"FileDescription": "wtv++",
+			"LegalCopyright": "(c) 2026, 一个橙子pro",
+			"ProductName": "wtv++",
+			"Comments": "Wails 3 desktop application"
+		}
+	}
+}

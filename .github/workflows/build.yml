@@ -1,95 +1,58 @@
-name: Build Wails Application
+name: Build Installers
 
 on:
-  push:
-    branches: [main]
-    tags:
-      - 'v*'
-    paths-ignore:
-      - '**.md'
-      - '.github/**'
-      - '.vscode/**'
   workflow_dispatch:
     inputs:
       version:
-        description: '可选版本号，例如 1.4.1'
+        description: '可选版本号，例如 3.0.1'
         required: false
         type: string
+  push:
+    tags:
+      - 'v*'
+
+env:
+  APP_NAME: wtvplusplus
+  PRODUCT_NAME: wtv++
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  frontend:
-    name: Frontend Build
-    runs-on: ubuntu-latest
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-14
+            artifact_name: macos-arm64
+            goarch: arm64
+          - os: windows-latest
+            artifact_name: windows-amd64
+            goarch: amd64
+          - os: ubuntu-24.04
+            artifact_name: linux-amd64
+            goarch: amd64
+    runs-on: ${{ matrix.os }}
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Resolve release version
-        id: version
+      - name: Resolve build version
         shell: bash
         run: |
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" && -n "${{ inputs.version }}" ]]; then
-            VER="${{ inputs.version }}"
-          elif [[ "${{ github.ref }}" == refs/tags/v* ]]; then
-            VER="${GITHUB_REF_NAME}"
-          else
-            VER="$(node -p "require('./package.json').version")"
+          VERSION="${{ github.event.inputs.version }}"
+          if [ -z "$VERSION" ]; then
+            VERSION="${GITHUB_REF_NAME#v}"
           fi
-          VER="${VER#v}"
-          echo "version=$VER" >> "$GITHUB_OUTPUT"
-          echo "APP_VERSION=$VER" >> "$GITHUB_ENV"
-          echo "Resolved APP_VERSION=$VER"
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Install frontend dependencies
-        run: npm install --ignore-scripts
-
-      - name: Sync package.json version
-        run: npm pkg set "version=${{ env.APP_VERSION }}"
-
-      - name: Build frontend
-        run: npm run build:wails:frontend
-        env:
-          APP_VERSION: ${{ env.APP_VERSION }}
-
-      - name: Upload frontend artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: frontend-dist
-          path: frontend/dist
-          if-no-files-found: error
-          retention-days: 5
-
-  macos:
-    name: macOS arm64 Wails Build
-    runs-on: macos-14
-    needs: frontend
-    permissions:
-      contents: write
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Resolve release version
-        shell: bash
-        run: |
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" && -n "${{ inputs.version }}" ]]; then
-            VER="${{ inputs.version }}"
-          elif [[ "${{ github.ref }}" == refs/tags/v* ]]; then
-            VER="${GITHUB_REF_NAME}"
-          else
-            VER="$(node -p "require('./package.json').version")"
+          if [ -z "$VERSION" ] || [ "$VERSION" = "$GITHUB_REF_NAME" ]; then
+            VERSION="0.0.0-${GITHUB_SHA::7}"
           fi
-          VER="${VER#v}"
-          echo "APP_VERSION=$VER" >> "$GITHUB_ENV"
-          echo "Resolved APP_VERSION=$VER"
+          VERSION="$(echo "$VERSION" | tr -cd '0-9A-Za-z.-')"
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+          echo "APP_VERSION=$VERSION" >> "$GITHUB_ENV"
+          echo "Resolved VERSION=$VERSION"
 
       - name: Setup Go
         uses: actions/setup-go@v5
@@ -102,55 +65,139 @@ jobs:
         with:
           node-version: 20
 
+      - name: Install frontend dependencies
+        shell: bash
+        run: npm install --ignore-scripts
+
+      - name: Sync version metadata
+        shell: bash
+        run: |
+          npm pkg set "version=${VERSION}"
+          python3 - <<'PY'
+          import json, os, pathlib, re
+
+          ver = os.environ["VERSION"]
+
+          cfg = pathlib.Path("build/config.yml")
+          text = cfg.read_text()
+          text, n = re.subn(r'(?m)^(  version:\s*)".*"$', rf'\1"{ver}"', text, count=1)
+          if n != 1:
+              raise SystemExit("failed to patch build/config.yml version")
+          cfg.write_text(text)
+
+          info_path = pathlib.Path("build/windows/info.json")
+          info = json.loads(info_path.read_text())
+          info["fixed"]["file_version"] = ver
+          info["info"]["0000"]["ProductVersion"] = ver
+          info_path.write_text(json.dumps(info, ensure_ascii=False, indent="\t") + "\n")
+
+          manifest = pathlib.Path("build/windows/wails.exe.manifest")
+          mtext = manifest.read_text()
+          mtext, n = re.subn(
+              r'(assemblyIdentity[^>]*version=")[^"]+(")',
+              rf'\g<1>{ver}\2',
+              mtext,
+              count=1,
+          )
+          if n != 1:
+              raise SystemExit("failed to patch windows manifest version")
+          manifest.write_text(mtext)
+          PY
+
       - name: Install Wails 3 CLI
         shell: bash
         run: |
           go install github.com/wailsapp/wails/v3/cmd/wails3@v3.0.0-beta.4
           echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
 
-      - name: Install frontend dependencies
-        run: npm install --ignore-scripts
-
-      - name: Sync version metadata
+      - name: Generate platform icons
         shell: bash
         run: |
-          npm pkg set "version=${APP_VERSION}"
-          python3 - <<'PY'
-          import os, pathlib, re
-          path = pathlib.Path("build/config.yml")
-          text = path.read_text()
-          ver = os.environ["APP_VERSION"]
-          text, n = re.subn(r'(?m)^(  version:\s*)".*"$', rf'\1"{ver}"', text, count=1)
-          if n != 1:
-              raise SystemExit("failed to patch build/config.yml version")
-          path.write_text(text)
-          PY
+          if command -v task >/dev/null 2>&1; then
+            task generate:icons
+          else
+            go install github.com/go-task/task/v3/cmd/task@latest
+            "$(go env GOPATH)/bin/task" generate:icons
+          fi
+
+      - name: Install Linux build dependencies
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential pkg-config \
+            libgtk-4-dev libwebkitgtk-6.0-dev
 
       - name: Build frontend
+        shell: bash
         run: npm run build:wails:frontend
         env:
-          APP_VERSION: ${{ env.APP_VERSION }}
+          APP_VERSION: ${{ env.VERSION }}
 
-      - name: Build Wails application
-        run: wails3 build
-        env:
-          APP_VERSION: ${{ env.APP_VERSION }}
+      - name: Build & package macOS
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          chmod +x scripts/*.sh
+          mkdir -p bin/ffmpeg/lib
+          cp native/ffmpeg/lib/*.dylib bin/ffmpeg/lib/
+          CGO_ENABLED=1 GOARCH=${{ matrix.goarch }} \
+            go build -tags production -trimpath -buildvcs=false \
+            -ldflags="-w -s" \
+            -o "bin/${APP_NAME}" .
+          install_name_tool -delete_rpath @executable_path/ffmpeg/lib "bin/${APP_NAME}" 2>/dev/null || true
+          install_name_tool -add_rpath @executable_path/ffmpeg/lib "bin/${APP_NAME}"
+          VERSION="$VERSION" APP_NAME="$APP_NAME" PRODUCT_NAME="$PRODUCT_NAME" \
+            bash scripts/package-macos.sh
 
-      - name: Upload macOS artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: wtvplusplus-macos-arm64
-          path: |
-            bin/wtv
-            bin/ffmpeg/lib
-          if-no-files-found: error
-          retention-days: 5
+      - name: Build & package Windows
+        if: runner.os == 'Windows'
+        shell: bash
+        run: |
+          chmod +x scripts/*.sh
+          mkdir -p bin
+          wails3 generate syso \
+            -arch ${{ matrix.goarch }} \
+            -icon build/windows/icon.ico \
+            -manifest build/windows/wails.exe.manifest \
+            -info build/windows/info.json \
+            -out "wails_windows_${{ matrix.goarch }}.syso"
+          CGO_ENABLED=0 GOOS=windows GOARCH=${{ matrix.goarch }} \
+            go build -tags production -trimpath -buildvcs=false \
+            -ldflags="-w -s -H windowsgui" \
+            -o "bin/${APP_NAME}.exe" .
+          rm -f wails_windows_*.syso
+          VERSION="$VERSION" APP_NAME="$APP_NAME" GOARCH=${{ matrix.goarch }} \
+            bash scripts/package-windows.sh
 
-      - name: Create GitHub release
+      - name: Build & package Linux
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          chmod +x scripts/*.sh build/linux/wtvplusplus.wrapper.sh
+          mkdir -p bin
+          CGO_ENABLED=1 GOOS=linux GOARCH=${{ matrix.goarch }} \
+            go build -tags production -trimpath -buildvcs=false \
+            -ldflags="-w -s" \
+            -o "bin/${APP_NAME}" .
+          VERSION="$VERSION" APP_NAME="$APP_NAME" GOARCH=${{ matrix.goarch }} \
+            bash scripts/package-linux.sh
+
+      - name: Upload GitHub Release assets (tag push)
         if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
           generate_release_notes: true
-          files: |
-            bin/wtv
-            bin/ffmpeg/lib/*.dylib
+          files: dist/**
+
+      - name: Upload artifacts (manual builds)
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: dist/**
+          if-no-files-found: error
+          retention-days: 5
