@@ -1,5 +1,5 @@
 {
-  "name": "wtv++",
+  "name": "wtvplusplus",
   "version": "3.0.0",
   "description": "wtv++",
   "author": "一个橙子pro <942242856@qq.com>",
@@ -21,8 +21,8 @@
   "type": "module",
   "scripts": {
     "dev": "wails3 dev -config build/config.yml",
-    "dev:wails:frontend": "vite --config frontend/vite.config.ts",
-    "build:wails:frontend": "vite build --config frontend/vite.config.ts",
+    "dev:wails:frontend": "npx vite --config frontend/vite.config.ts",
+    "build:wails:frontend": "npx vite build --config frontend/vite.config.ts",
     "build:wails": "npm run build:wails:frontend && wails3 generate bindings && task generate:icons && wails3 build",
     "generate:icons": "task generate:icons"
   },

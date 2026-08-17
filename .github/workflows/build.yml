@@ -65,6 +65,10 @@ jobs:
         with:
           node-version: 20
 
+      - name: Install frontend dependencies
+        shell: bash
+        run: npm install --ignore-scripts
+
       - name: Install Linux build dependencies
         if: runner.os == 'Linux'
         shell: bash
