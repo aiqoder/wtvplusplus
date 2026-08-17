@@ -45,7 +45,7 @@
     "@codemirror/view": "^6.28.6",
     "@vavt/util": "^1.7.0",
     "@vicons/ionicons5": "^0.12.0",
-    "@vueuse/core": "^10.11.0",
+    "@vueuse/core": "^14.4.0",
     "@wailsio/runtime": "^3.0.0-beta.4",
     "axios": "^1.7.2",
     "chardet": "^2.0.0",
