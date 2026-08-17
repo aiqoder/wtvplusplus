@@ -65,9 +65,23 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install frontend dependencies
+      - name: Install Linux build dependencies
+        if: runner.os == 'Linux'
         shell: bash
-        run: npm install --ignore-scripts
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential pkg-config \
+            libgtk-4-dev libwebkitgtk-6.0-dev
+
+      - name: Install Wails 3 CLI
+        if: runner.os == 'Windows' || runner.os == 'macOS'
+        shell: bash
+        run: |
+          # Windows needs wails3 for syso; macOS may regenerate icons.
+          # Linux app build uses plain `go build` and committed icons.
+          go install github.com/wailsapp/wails/v3/cmd/wails3@v3.0.0-beta.4
+          echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
 
       - name: Sync version metadata
         shell: bash
@@ -77,57 +91,51 @@ jobs:
           import json, os, pathlib, re
 
           ver = os.environ["VERSION"]
+          # Windows assembly/file version prefers 4-part numbers
+          parts = ver.split(".")
+          while len(parts) < 4:
+              parts.append("0")
+          win_ver = ".".join(parts[:4])
 
           cfg = pathlib.Path("build/config.yml")
-          text = cfg.read_text()
+          text = cfg.read_text(encoding="utf-8")
           text, n = re.subn(r'(?m)^(  version:\s*)".*"$', rf'\1"{ver}"', text, count=1)
           if n != 1:
               raise SystemExit("failed to patch build/config.yml version")
-          cfg.write_text(text)
+          cfg.write_text(text, encoding="utf-8")
 
           info_path = pathlib.Path("build/windows/info.json")
-          info = json.loads(info_path.read_text())
-          info["fixed"]["file_version"] = ver
+          info = json.loads(info_path.read_text(encoding="utf-8"))
+          info["fixed"]["file_version"] = win_ver
           info["info"]["0000"]["ProductVersion"] = ver
-          info_path.write_text(json.dumps(info, ensure_ascii=False, indent="\t") + "\n")
+          info_path.write_text(json.dumps(info, ensure_ascii=False, indent="\t") + "\n", encoding="utf-8")
 
           manifest = pathlib.Path("build/windows/wails.exe.manifest")
-          mtext = manifest.read_text()
+          mtext = manifest.read_text(encoding="utf-8")
           mtext, n = re.subn(
               r'(assemblyIdentity[^>]*version=")[^"]+(")',
-              rf'\g<1>{ver}\2',
+              rf'\g<1>{win_ver}\2',
               mtext,
               count=1,
           )
           if n != 1:
               raise SystemExit("failed to patch windows manifest version")
-          manifest.write_text(mtext)
+          manifest.write_text(mtext, encoding="utf-8")
           PY
-
-      - name: Install Wails 3 CLI
-        shell: bash
-        run: |
-          go install github.com/wailsapp/wails/v3/cmd/wails3@v3.0.0-beta.4
-          echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
 
       - name: Generate platform icons
         shell: bash
         run: |
+          if [[ -f build/darwin/icons.icns && -f build/windows/icon.ico && -f build/appicon.png ]]; then
+            echo "Packaging icons already present, skip regenerate"
+            exit 0
+          fi
           if command -v task >/dev/null 2>&1; then
             task generate:icons
           else
             go install github.com/go-task/task/v3/cmd/task@latest
             "$(go env GOPATH)/bin/task" generate:icons
           fi
-
-      - name: Install Linux build dependencies
-        if: runner.os == 'Linux'
-        shell: bash
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            build-essential pkg-config \
-            libgtk-4-dev libwebkitgtk-6.0-dev
 
       - name: Build frontend
         shell: bash
