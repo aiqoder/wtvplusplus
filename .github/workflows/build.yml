@@ -80,9 +80,27 @@ jobs:
 
       - name: Install Windows CGO toolchain (MinGW)
         if: runner.os == 'Windows'
-        uses: egor-tensin/setup-mingw@v2
-        with:
-          platform: x64
+        shell: bash
+        run: |
+          choco install mingw -y --no-progress
+          MINGW_BIN=""
+          for candidate in \
+            "/c/ProgramData/mingw64/mingw64/bin" \
+            "/c/ProgramData/chocolatey/lib/mingw/tools/install/mingw64/bin"
+          do
+            if [[ -x "$candidate/gcc.exe" ]]; then
+              MINGW_BIN="$candidate"
+              break
+            fi
+          done
+          if [[ -z "$MINGW_BIN" ]]; then
+            echo "MinGW gcc not found after chocolatey install" >&2
+            find /c/ProgramData -name 'gcc.exe' 2>/dev/null | head -20 || true
+            exit 1
+          fi
+          echo "$MINGW_BIN" >> "$GITHUB_PATH"
+          export PATH="$MINGW_BIN:$PATH"
+          gcc --version
 
       - name: Install Wails 3 CLI
         if: runner.os == 'Windows' || runner.os == 'macOS'
