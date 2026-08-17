@@ -75,8 +75,14 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-            build-essential pkg-config \
+            build-essential pkg-config patchelf \
             libgtk-4-dev libwebkitgtk-6.0-dev
+
+      - name: Install Windows CGO toolchain (MinGW)
+        if: runner.os == 'Windows'
+        uses: egor-tensin/setup-mingw@v2
+        with:
+          platform: x64
 
       - name: Install Wails 3 CLI
         if: runner.os == 'Windows' || runner.os == 'macOS'
@@ -86,6 +92,17 @@ jobs:
           # Linux app build uses plain `go build` and committed icons.
           go install github.com/wailsapp/wails/v3/cmd/wails3@v3.0.0-beta.4
           echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+
+      - name: Fetch platform FFmpeg shared libraries
+        if: runner.os == 'Windows' || runner.os == 'Linux'
+        shell: bash
+        run: |
+          chmod +x scripts/fetch-ffmpeg.sh
+          if [[ "${{ runner.os }}" == "Windows" ]]; then
+            bash scripts/fetch-ffmpeg.sh windows ${{ matrix.goarch }}
+          else
+            bash scripts/fetch-ffmpeg.sh linux ${{ matrix.goarch }}
+          fi
 
       - name: Sync version metadata
         shell: bash
@@ -175,7 +192,8 @@ jobs:
             -manifest build/windows/wails.exe.manifest \
             -info build/windows/info.json \
             -out "wails_windows_${{ matrix.goarch }}.syso"
-          CGO_ENABLED=0 GOOS=windows GOARCH=${{ matrix.goarch }} \
+          gcc --version
+          CGO_ENABLED=1 CC=gcc GOOS=windows GOARCH=${{ matrix.goarch }} \
             go build -tags production -trimpath -buildvcs=false \
             -ldflags="-w -s -H windowsgui" \
             -o "bin/${APP_NAME}.exe" .
@@ -188,11 +206,13 @@ jobs:
         shell: bash
         run: |
           chmod +x scripts/*.sh build/linux/wtvplusplus.wrapper.sh
-          mkdir -p bin
+          mkdir -p bin/ffmpeg/lib
+          cp -a native/ffmpeg/linux/lib/*.so* bin/ffmpeg/lib/
           CGO_ENABLED=1 GOOS=linux GOARCH=${{ matrix.goarch }} \
             go build -tags production -trimpath -buildvcs=false \
             -ldflags="-w -s" \
             -o "bin/${APP_NAME}" .
+          patchelf --set-rpath '$ORIGIN/ffmpeg/lib' "bin/${APP_NAME}"
           VERSION="$VERSION" APP_NAME="$APP_NAME" GOARCH=${{ matrix.goarch }} \
             bash scripts/package-linux.sh
 

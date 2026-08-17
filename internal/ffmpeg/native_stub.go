@@ -1,4 +1,4 @@
-//go:build !darwin
+//go:build !cgo || (!darwin && !linux && !windows)
 
 package ffmpeg
 
@@ -10,4 +10,8 @@ func nativeProbe(context.Context, string) (VideoInfo, error) {
 
 func nativeVersion() (string, error) {
 	return "", ErrNativeUnavailable
+}
+
+func nativeRemux(context.Context, string, OutputWriter) error {
+	return ErrNativeUnavailable
 }

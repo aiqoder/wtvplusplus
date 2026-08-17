@@ -36,6 +36,10 @@ build/bin
 *.test
 dist
 
+# Downloaded platform FFmpeg shared libraries (fetch via scripts/fetch-ffmpeg.sh)
+native/ffmpeg/windows/
+native/ffmpeg/linux/
+
 # Wails frontend source asset directory (generated files inside are required
 # by Go embed; only its generated build output should be ignored elsewhere).
 !frontend/

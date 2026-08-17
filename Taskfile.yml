@@ -60,10 +60,13 @@ tasks:
       - generate:icons
     cmds:
       - npm run build:wails:frontend
+      - bash scripts/fetch-ffmpeg.sh windows {{.ARCH}}
       - mkdir -p bin
       - wails3 generate syso -arch {{.ARCH}} -icon build/windows/icon.ico -manifest build/windows/wails.exe.manifest -info build/windows/info.json -out wails_windows_{{.ARCH}}.syso
-      - go build -tags production -ldflags="-w -s -H windowsgui" -o bin/{{.BIN_NAME}}.exe .
+      - CGO_ENABLED=1 go build -tags production -ldflags="-w -s -H windowsgui" -o bin/{{.BIN_NAME}}.exe .
       - rm -f wails_windows_*.syso
+      - mkdir -p bin/windows-runtime
+      - cp native/ffmpeg/windows/bin/*.dll bin/windows-runtime/
 
   windows:package:
     cmds:
@@ -73,6 +76,7 @@ tasks:
   windows:run:
     cmds:
       - task: windows:build
+      - cp native/ffmpeg/windows/bin/*.dll bin/
       - ./bin/{{.BIN_NAME}}.exe
 
   linux:build:
@@ -80,8 +84,11 @@ tasks:
       - generate:icons
     cmds:
       - npm run build:wails:frontend
-      - mkdir -p bin
-      - go build -o bin/{{.BIN_NAME}} .
+      - bash scripts/fetch-ffmpeg.sh linux {{.ARCH}}
+      - mkdir -p bin/ffmpeg/lib
+      - cp -a native/ffmpeg/linux/lib/*.so* bin/ffmpeg/lib/
+      - CGO_ENABLED=1 go build -o bin/{{.BIN_NAME}} .
+      - if command -v patchelf >/dev/null 2>&1; then patchelf --set-rpath '$$ORIGIN/ffmpeg/lib' bin/{{.BIN_NAME}}; fi
       - cp build/appicon.png bin/wtvplusplus.png
       - cp build/linux/wtvplusplus.desktop bin/wtvplusplus.desktop
 

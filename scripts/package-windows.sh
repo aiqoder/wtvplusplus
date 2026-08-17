@@ -17,10 +17,18 @@ if [[ ! -f "$EXE" ]]; then
   exit 1
 fi
 
+FFMPEG_BIN="$ROOT_DIR/native/ffmpeg/windows/bin"
+if [[ ! -d "$FFMPEG_BIN" ]]; then
+  echo "Missing Windows FFmpeg runtime DLLs. Run: bash scripts/fetch-ffmpeg.sh windows $ARCH" >&2
+  exit 1
+fi
+
 STAGE="$BIN_DIR/windows-stage"
 rm -rf "$STAGE"
 mkdir -p "$STAGE"
 cp "$EXE" "$STAGE/${APP_NAME}.exe"
+# Ship all shared FFmpeg dependencies next to the executable.
+cp "$FFMPEG_BIN"/*.dll "$STAGE/"
 
 ZIP_PATH="$DIST_DIR/${APP_NAME}_${VERSION}_windows-${ARCH}.zip"
 rm -f "$ZIP_PATH"
@@ -44,7 +52,6 @@ else
   exit 1
 fi
 
-cp "$EXE" "$DIST_DIR/${APP_NAME}_${VERSION}_windows-${ARCH}.exe"
-
-echo "Created $ZIP_PATH"
+# Also keep a copy of the portable zip naming without implying a lone .exe works.
+echo "Created $ZIP_PATH (includes FFmpeg DLLs)"
 ls -lh "$DIST_DIR"
