@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import mpegts from "mpegts.js"
 import { useToggle } from "@vueuse/core";
-import { getStreamFFmpegArgs, getStreamInfo } from "@/utils/util";
+import { getStreamURL, startPlayback, stopPlayback } from "@/api/native";
 
 export const useVideo = defineStore("palyer-video", () => {
     const [visible, toggle] = useToggle()
@@ -9,19 +9,14 @@ export const useVideo = defineStore("palyer-video", () => {
     const name = Math.random().toString(16).slice(2)
     async function player(videoElement: Ref<HTMLVideoElement>) {
         if (!url.value) return
-        const port = await window.eUtils.getStore("wsport")
-        window.eUtils.execPorcess({
-            root: "ffmpeg/ffmpeg",
-            timeout: 60 * 1000 * 60 * 24,
-            args: getStreamFFmpegArgs(url.value as string).join(" "),
-            name,
-        })
+        const streamURL = await getStreamURL()
+        startPlayback(url.value as string)
 
         if (mpegts.getFeatureList().mseLivePlayback) {
             const player = mpegts.createPlayer({
                 type: 'mse',  // could also be mpegts, m2ts, flv
                 isLive: true,
-                url: `ws://127.0.0.1:${port}`,
+                url: streamURL,
             });
             player.attachMediaElement(unref(videoElement));
             player.load();
@@ -31,7 +26,7 @@ export const useVideo = defineStore("palyer-video", () => {
 
     watchEffect(()=>{
         if(!visible.value) {
-            window.eUtils.closePorcess(name)
+            stopPlayback()
         }
     })
 

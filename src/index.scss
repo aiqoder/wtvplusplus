@@ -34,9 +34,21 @@
 body {
   margin: 0;
   max-height: 100vh;
-  mix-blend-mode: difference;
-  // background-color: #18181c;
-  // color: #cccccc;
+  min-height: 100vh;
+  overflow: hidden;
+  background-color: #18181c;
+  color: #e5e7eb;
+}
+
+:root, :host {
+  color-scheme: dark;
+  background-color: #18181c;
+  color: #e5e7eb;
+}
+
+#app {
+  min-height: 100vh;
+  background-color: #18181c;
 }
 
 .disabled {

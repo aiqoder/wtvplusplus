@@ -1,47 +1,99 @@
-name: Build
+name: Build Wails Application
 
 on:
   push:
     branches: [main]
+    tags:
+      - 'v*'
     paths-ignore:
-      - "**.md"
-      - "**.spec.js"
-      - ".idea"
-      - ".vscode"
-      - ".dockerignore"
-      - "Dockerfile"
-      - ".gitignore"
-      - ".github/**"
-      - "!.github/workflows/build.yml"
+      - '**.md'
+      - '.github/**'
+      - '.vscode/**'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: '可选版本号，例如 1.4.1'
+        required: false
+        type: string
+
+permissions:
+  contents: read
 
 jobs:
-  build:
-    runs-on: ${{ matrix.os }}
-
-    strategy:
-      matrix:
-        os: [macos-latest, ubuntu-latest, windows-latest]
-
+  frontend:
+    name: Frontend Build
+    runs-on: ubuntu-latest
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
 
-      - name: Install Dependencies
-        run: npm install
+      - name: Install frontend dependencies
+        run: npm install --ignore-scripts
 
-      - name: Build Release Files
-        run: npm run build
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build frontend
+        run: npm run build:wails:frontend
 
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v3
+      - name: Upload frontend artifact
+        uses: actions/upload-artifact@v4
         with:
-          name: release_on_${{ matrix. os }}
-          path: release/
+          name: frontend-dist
+          path: frontend/dist
+          if-no-files-found: error
           retention-days: 5
+
+  macos:
+    name: macOS arm64 Wails Build
+    runs-on: macos-14
+    needs: frontend
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Wails 3 CLI
+        shell: bash
+        run: |
+          go install github.com/wailsapp/wails/v3/cmd/wails3@v3.0.0-beta.4
+          echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+
+      - name: Install frontend dependencies
+        run: npm install --ignore-scripts
+
+      - name: Build Wails application
+        run: wails3 build
+
+      - name: Upload macOS artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: wtv-macos-arm64
+          path: |
+            bin/wtv
+            bin/ffmpeg/lib
+          if-no-files-found: error
+          retention-days: 5
+
+      - name: Create GitHub release
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: |
+            bin/wtv
+            bin/ffmpeg/lib/*.dylib

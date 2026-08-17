@@ -48,6 +48,7 @@ import Rename from "./svg/Rename.vue"
 import RenameDialog from "./Rename.vue"
 import { isUrl } from '../../../utils/file';
 import { message } from "@/utils/data";
+import { readClipboard } from "@/api/native";
 
 export default defineComponent({
   components: {
@@ -68,7 +69,7 @@ export default defineComponent({
 
     const isCheckSpeed = useLocalStorage("_menu_speed", false); //极速模式
     const isCheckWolf = useLocalStorage("_menu_wolf", true); // 健康模式
-    function clipboardTextImport() {
+    async function clipboardTextImport() {
       // 导入逻辑判断
       function importM3u(importTxt: string) {
         if (importTxt.trim().startsWith("#EXTM3U")) {
@@ -82,7 +83,7 @@ export default defineComponent({
         }
       }
 
-      const clipboardText = window.eApi.getClipboardText();
+      const clipboardText = await readClipboard();
 
       if (isUrl(clipboardText)) {
         let url = clipboardText;

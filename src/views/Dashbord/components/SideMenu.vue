@@ -75,6 +75,7 @@ import {
 import { readerHandleTxt } from "@/utils/file";
 import { readerHandleM3u } from '../../../utils/file';
 import { useOriginData } from "@/store/originFormatData";
+import { selectAndRead } from "@/api/native";
 export default defineComponent({
   props: {
     process: {
@@ -111,7 +112,7 @@ export default defineComponent({
 
     // 本地文件导入逻辑
     function changeFile() {
-      window.eApi.readFileDialogAsText().then(res=>{
+      selectAndRead().then(res=>{
         const { path, data } = res
         const suffix = path.slice(path.lastIndexOf("."), path.length);
         if (suffix.indexOf("m3u") > -1) {

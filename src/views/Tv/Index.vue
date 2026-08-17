@@ -27,7 +27,7 @@
 </template>
 <script setup lang="ts">
 import { isUrl } from '@/utils/file';
-import { getStreamInfo } from '@/utils/util';
+import { getVideoInfo } from '@/api/native';
 import axios from 'axios';
 import VideoPlayer from "./VideoPlayer.vue"
 import { useLoadingBar } from 'naive-ui';
@@ -99,12 +99,14 @@ async function handlePlay(a) {
         }
         // 排除空连接
         if (!u) continue
-        const response = await window.eUtils.execPorcess({
-            root: "ffmpeg/ffmpeg",
-            timeout: 5 * 1000,
-            args: `-hide_banner -i ${u}`,
-        })
-        const info = getStreamInfo(response.data)
+        const response = await getVideoInfo(u, 5 * 1000)
+        const stream = response.streams.find((item) => item.codecType === 'video' && item.width > 0 && item.height > 0)
+        const info = stream ? {
+            width: stream.width,
+            height: stream.height,
+            fps: stream.frameRate,
+            codec: stream.codecName,
+        } : undefined
         msg.value = `正在解析第${index + 1}视频，链接：${u}，正在尝试获取流信息...`
         if (info) {
             msg.value = "解析完成，正在尝试获取流信息..."

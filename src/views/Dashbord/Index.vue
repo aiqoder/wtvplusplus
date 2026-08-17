@@ -10,9 +10,6 @@
           <p>1. 列表位置，点击右键发现更多功能</p>
           <p>2. 双击名称，删除这一行</p>
         </n-alert>
-        <div class=" text-gray pos-absolute pos-bottom-0 text-center w-full" v-if="network.status == 200">
-          <div>当前网络 ：{{ network.province }}-{{ network.isp }}</div>
-        </div>
       </n-layout-sider>
       <n-layout>
         <!-- 检测进度 -->
@@ -99,10 +96,6 @@ import { useCheck } from './hooks/videoCheck';
 import { useOriginData } from '@/store/originFormatData';
 import { useSearch } from '@/store/search';
 import { useVideo } from '@/store/video';
-import { jsSleep } from '@/utils/util';
-import { useIntervalFn } from "@vueuse/core";
-import axios from "axios";
-
 defineOptions({
   name: "dashbord"
 })
@@ -202,27 +195,23 @@ async function checkM3u() {
   }
 
   checkProcess.value = true;
-  let checkCount = 0;
+  defaultCheck.startCheck()
 
   for (const [index, m3u8] of unref(m3uData).entries()) {
-    //当前检测的数量，大于5个则暂停检测, 停止1000ms继续进行
-    if (checkCount > 5) {
-      await jsSleep(1000)
-    }
+    if (!checkProcess.value) break
     //跳过已经检测过的源
     if (m3u8.success != undefined) {
       continue;
     }
 
     // 检测停止控制
-    checkCount += 1;
     if (!checkProcess.value) {
-      checkCount = 0;
       console.warn("已取消");
       break;
     }
 
-    defaultCheck.createRequest(m3u8).then((res) => {
+    await defaultCheck.createRequest(m3u8).then((res) => {
+      if (!checkProcess.value) return
       m3u8.success = true;
       m3u8.rSpeed = res.speed + "ms"
       m3u8.ratio = res.width ? `${res.width}x${res.height}` : '未知'
@@ -233,14 +222,7 @@ async function checkM3u() {
         m3u8.rSpeed = "-1"
         m3u8.success = false;
       }
-    }).finally(() => {
-      checkCount -= 1;
     })
-    // // 原力链接检测
-    // const lowUrl = m3u8.url.toLocaleLowerCase()
-    // if (lowUrl.startsWith("p2p://") || lowUrl.startsWith("p8p://") || lowUrl.startsWith("mitv://")) {
-    //   await jsSleep(5000)
-    // }
   }
 }
 
@@ -298,27 +280,6 @@ onDeactivated(() => {
   SettingModalVisible.value = false
   video.visible = false
 })
-
-const network = reactive({
-  status: 200,
-  isp: "",
-  province: ""
-})
-
-useIntervalFn(
-  () => {
-    axios.get("https://ip.yigechengzi.com").then(res => {
-      network.status = res.data?.code
-      network.isp = res.data?.data?.isp
-      network.province = res.data?.data?.province
-    }).catch(res => {
-      network.status = 500
-    })
-  },
-  60 * 1000,
-  {
-    immediateCallback: true,
-  })
 </script>
 <style>
 .n-table .success-row {

@@ -1,18 +1,14 @@
 import { addTvs } from '@/api';
-import { useSearch } from '@/store/search';
 import { M3UObject } from '@/utils/file';
-import { getStreamInfo } from '@/utils/util';
+import { cancelProbes, getVideoInfo } from '@/api/native';
 
-const pids: string[] = []
 let port = 9106
 export function useCheck() {
-  const search = useSearch()
-  function createRequest(m3u8: M3UObject): Promise<{ width: number, height: number, speed: number, fps: number, codec: string }> {
-    return new Promise(async (resolve, reject) => {
-      const name = Math.random().toString(36).slice(2, 9) + new Date().toISOString()
-      pids.push(name)
-
-      const start = new Date().getTime()
+  let stopped = false
+  let currentRequest: any
+  async function createRequest(m3u8: M3UObject): Promise<{ width: number, height: number, speed: number, fps: number, codec: string }> {
+    if (stopped) throw new Error('检测已停止')
+    const start = new Date().getTime()
 
       // 原力链接检测
       // const lowUrl = m3u8.url.toLocaleLowerCase()
@@ -22,7 +18,7 @@ export function useCheck() {
       //   const sp = lowUrl.split("/")
       //   const server = sp[2]
       //   const channel = sp[3]
-      //   await window.eUtils.execPorcess({
+      //   await forceTvService({
       //     root: "forcetv/forcetv.exe",
       //     timeout: 10 * 1000,
       //     args: `-s ${server} -c ${channel} -o ${port}`,
@@ -34,36 +30,44 @@ export function useCheck() {
       //   if (port > 9900) port = 9106
       // }
 
-      window.eUtils.execPorcess({
-        root: "ffmpeg/ffmpeg",
-        timeout: 8 * 1000,
-        args: `-hide_banner -i ${m3u8.url}`,
-        name,
-      }).then(response => {
-        console.log(response.data)
-        const info = getStreamInfo(response.data, search.strict)
+    currentRequest = getVideoInfo(m3u8.url, 8 * 1000)
+    try {
+      const response = await currentRequest
+      if (stopped) throw new Error('检测已停止')
+        const stream = response.streams.find((item) => item.codecType === 'video' && item.width > 0 && item.height > 0)
+        const info = stream ? {
+          width: stream.width,
+          height: stream.height,
+          fps: stream.frameRate,
+          codec: stream.codecName,
+        } : undefined
         const speed = new Date().getTime() - start
         if (info) {
           addTvs({ url: m3u8.url, name: m3u8.name, id: m3u8.id, width: info.width, height: info.height, speed: speed, fail: false })
-          resolve({ ...info, speed })
+          return { ...info, speed }
         } else {
           addTvs({ url: m3u8.url, name: m3u8.name, id: m3u8.id, fail: true })
-          reject()
+          throw new Error('未发现视频流')
         }
-      })
-        .catch(reject)
-    })
+    } finally {
+      currentRequest = null
+    }
   }
 
   function stopCheck() {
-    pids.forEach(pid => {
-      window.eUtils.closePorcess(pid)
-    });
-    pids.length = 0
+    stopped = true
+    currentRequest?.cancel?.('检测已停止')
+    void cancelProbes()
+    currentRequest = null
+  }
+
+  function startCheck() {
+    stopped = false
   }
 
   return {
     createRequest,
-    stopCheck
+    stopCheck,
+    startCheck,
   }
 }

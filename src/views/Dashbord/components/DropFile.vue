@@ -6,7 +6,7 @@
   <div
     class="drap-area"
     v-if="dropVisible"
-    @drop="dropFile"
+    @drop.prevent="dropFile"
     @mouseup="leaveDrop"
     @mouseout="leaveDrop"
     @dragover.prevent
@@ -43,7 +43,7 @@ export default defineComponent({
       const suffix = file.name.slice(file.name.indexOf("."), file.name.length);
 
       if (accept.indexOf(suffix) > -1) {
-        window.eApi.readFileAsText(file.path).then(data=>{
+         file.text().then(data=>{
           if (suffix.indexOf("m3u") > -1) {
             emit("getM3u", readerHandleM3u(data), "local");
             importTxt(data, "m3u")

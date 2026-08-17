@@ -1,0 +1,28 @@
+version: '3'
+
+info:
+  companyName: "一个橙子pro"
+  productName: "wtv"
+  productIdentifier: "com.yigechengzipro.wtv"
+  description: "一个橙子pro工具箱"
+  copyright: "(c) 2026, 一个橙子pro"
+  comments: "Wails 3 desktop application"
+  version: "1.4.0"
+
+dev_mode:
+  root_path: .
+  log_level: warn
+  ignore:
+    dir:
+      - .git
+      - node_modules
+      - frontend
+      - bin
+    file:
+      - .DS_Store
+      - "*_test.go"
+  executes:
+    - cmd: npm run dev:wails:frontend -- --host 127.0.0.1 --port 9245
+      type: background
+    - cmd: go run .
+      type: primary

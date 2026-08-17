@@ -2,7 +2,7 @@
   <div class="container ">
     <n-h3> 说明 </n-h3>
     <n-p>
-      该软件基于 electron + vue3 + ffmpeg + mpegts 等技术栈实现的，用于测试ffmpeg转码能力，实现例如rpst、rtmp、hls 转换为h264格式，并且在web浏览器当中实现视频播放。
+      该软件基于 Wails 3 + Go + Vue3 + FFmpeg + mpegts 等技术栈实现，用于测试 FFmpeg 媒体处理能力，实现 RTSP、RTMP、HLS 等流转换并在 WebView 中播放。
     </n-p>
     <n-p>
       理论上支持海康、大华等摄像头视频流转化，并推送到web浏览器进行播放

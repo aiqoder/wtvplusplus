@@ -4,7 +4,7 @@ import { message, unique } from '@/utils/data';
 import emitter from '@/utils/eventbus';
 import { M3UObject } from '@/utils/file';
 import { useSpeed } from '@/store/checkSpeed';
-import { getStreamInfo } from '@/utils/util';
+import { getVideoInfo } from '@/api/native';
 import { useVideo } from '@/store/video';
 
 export default function useM3uTable() {
@@ -187,12 +187,9 @@ export default function useM3uTable() {
                                 disabled: playDisabled.value,
                                 onClick: () => {
                                     playDisabled.value = true;
-                                    window.eUtils.execPorcess({
-                                        root: "ffmpeg/ffmpeg",
-                                        timeout: check.timeout * 1000,
-                                        args: `-hide_banner -i ${row.url}`,
-                                    }).then((response) => {
-                                        const info = getStreamInfo(response.data)
+                                    getVideoInfo(String(row.url), check.timeout * 1000).then((response) => {
+                                        const stream = response.streams.find((item) => item.codecType === 'video' && item.width > 0 && item.height > 0)
+                                        const info = stream ? { width: stream.width, height: stream.height, fps: stream.frameRate, codec: stream.codecName } : undefined
                                         if (info) {
                                             video.url = row.url
                                             video.toggle()
@@ -286,4 +283,3 @@ export default function useM3uTable() {
 
     return { m3uColumns, m3uData, right, clearUnSuccessM3uData, removeDuplicationM3uData, rSpeedOrderBy, handleSorterChange }
 }
-

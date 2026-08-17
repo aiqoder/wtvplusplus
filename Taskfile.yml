@@ -1,0 +1,40 @@
+version: '3'
+
+vars:
+  APP_NAME: "wtv"
+  GOOS: '{{.GOOS | default OS}}'
+
+tasks:
+  build:
+    summary: Builds the Wails application
+    cmds:
+      - task: "{{.GOOS}}:build"
+
+  package:
+    summary: Packages the Wails application
+    cmds:
+      - task: "{{.GOOS}}:package"
+
+  run:
+    summary: Runs the Wails application
+    cmds:
+      - task: "{{.GOOS}}:run"
+
+  darwin:build:
+    cmds:
+      - npm run build:wails:frontend
+      - mkdir -p bin
+      - mkdir -p bin/ffmpeg/lib
+      - cp native/ffmpeg/lib/*.dylib bin/ffmpeg/lib/
+      - go build -o bin/wtv .
+      - install_name_tool -delete_rpath @executable_path/ffmpeg/lib bin/wtv 2>/dev/null || true
+      - install_name_tool -add_rpath @executable_path/ffmpeg/lib bin/wtv
+
+  darwin:package:
+    cmds:
+      - task: darwin:build
+
+  darwin:run:
+    cmds:
+      - task: darwin:build
+      - ./bin/wtv

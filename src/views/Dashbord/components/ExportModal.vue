@@ -49,6 +49,7 @@
   </div>
 </template>
 <script lang="ts" setup>
+import { writeClipboard } from '@/api/native'
 import { useSpeed } from '@/store/checkSpeed';
 import { getTvgLogoByName, message } from '@/utils/data';
 import { exportFile } from '@/utils/util';
@@ -175,7 +176,7 @@ function exportM3u(_suffix: string, exportType: 'file' | 'clip' = 'file') {
   }
 
   if (exportType === 'clip') {
-    window.eApi.writeClipboardText(getExportFunc(_suffix as "m3u" | "txt" | "txt-merge"))
+     writeClipboard(getExportFunc(_suffix as "m3u" | "txt" | "txt-merge"))
     message.success("文本已经成功复制到剪贴板")
   } else {
     exportFile(getExportFunc(_suffix as "m3u" | "txt" | "txt-merge"), title);

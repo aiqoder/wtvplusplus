@@ -2,9 +2,8 @@
     <video ref="videoRef" style="width:100%"></video>
 </template>
 <script lang="ts" setup>
-import { getStreamFFmpegArgs } from '@/utils/util';
-import Mpegts from 'mpegts.js';
 import mpegts from 'mpegts.js';
+import { getStreamURL, startPlayback, stopPlayback } from '@/api/native';
 
 let name = Math.random().toString(16).slice(2)
 
@@ -17,12 +16,12 @@ async function player(videoElement: Ref<HTMLVideoElement>) {
     //     p.detachMediaElement()
     //     p.destroy()
     // }
-    const port = await window.eUtils.getStore("wsport")
+    const streamURL = await getStreamURL()
     if (mpegts.getFeatureList().mseLivePlayback) {
         p = mpegts.createPlayer({
-            type: 'mse',  // could also be mpegts, m2ts, flv
+            type: 'mpegts',
             isLive: true,
-            url: `ws://127.0.0.1:${port}`,
+            url: streamURL,
         });
         p.attachMediaElement(unref(videoElement));
         p.load();
@@ -33,28 +32,24 @@ async function player(videoElement: Ref<HTMLVideoElement>) {
 // 监听URL进行拉流
 watch(() => props.url, async (url) => {
     if (!url) return
-    await window.eUtils.closePorcess(name)
+    await stopPlayback()
     name = Math.random().toString(16).slice(2)
 
-    window.eUtils.execPorcess({
-        root: "ffmpeg/ffmpeg",
-        timeout: 60 * 1000 * 60 * 24,
-        args: getStreamFFmpegArgs(url as string, props.info?.codec).join(" "),
-        name,
-    })
     if (!videoRef.value) {
-        nextTick(() => {
-            player(unref(videoRef))
+        nextTick(async () => {
+            await player(unref(videoRef))
+            void startPlayback(url as string)
         })
         return
     }
-    player(unref(videoRef))
+    await player(unref(videoRef))
+    void startPlayback(url as string)
 },
     {
         immediate: true,
     })
 
 onUnmounted(() => {
-    window.eUtils.closePorcess(name)
+    stopPlayback()
 })
 </script>

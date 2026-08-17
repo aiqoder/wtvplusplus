@@ -23,8 +23,6 @@ import { useRouter } from "vue-router";
 import { useSessionStorage } from '@vueuse/core';
 import HighQualityOutlined from "./menuSvg/HighQualityOutlined.vue"
 import { useThemeVars } from 'naive-ui';
-import { useSearch } from "@/store/search";
-const search = useSearch()
 const router = useRouter();
 const themeVars = useThemeVars()
 const acitveMenu = useSessionStorage("_wtv_tools_login", "jc"); // 菜单保持
@@ -37,11 +35,11 @@ const meuns = computed(() => [
     show: true,
   },
   {
-    title: "测试播放",
+    title: "播放",
     com: TvSharp,
     key: "tv",
     routerName: "tv",
-    show: search.open,
+    show: true,
   },
   {
     title: "关于",
