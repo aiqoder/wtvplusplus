@@ -45,7 +45,8 @@
           <div style="margin-top: 8px;background-color:var(--n-color)">
             <n-data-table :columns="m3uColumns" :data="m3uData" :row-props="right.rowProps" :pagination="false"
               :min-height="`calc(100vh - 190px + ${search.open ? '25px' : '70px'})`"
-              :max-height="`calc(100vh - 190px + ${search.open ? '25px' : '70px'})`" :row-key="(obj) => obj.url"
+              :max-height="`calc(100vh - 190px + ${search.open ? '25px' : '70px'})`"
+              :row-key="(obj) => obj.url"
               @update:sorter="handleSorterChange" virtual-scroll :single-line="false" size="small" />
 
           </div>
@@ -104,10 +105,11 @@ import ExportModal from "./components/ExportModal.vue";
 import SettingModal from "./components/SettingModal.vue";
 import AIGroupProgressModal from "@/components/AIGroupProgressModal.vue";
 import { message, notification } from '@/utils/data';
-import { useCheck } from './hooks/videoCheck';
+import { useCheck, applyExactGroups } from './hooks/videoCheck';
 import { useOriginData } from '@/store/originFormatData';
 import { useSearch } from '@/store/search';
 import { useVideo } from '@/store/video';
+import { getAIRule } from '@/api/native'
 import { applyAIGroupToSuccess, stripGroupsOnImport } from '@/utils/aiGroup';
 defineOptions({
   name: "dashbord"
@@ -165,7 +167,6 @@ const canAIGroup = computed(() => {
 watchEffect(() => {
   //检测是否完成，设置完成 autoCheckQueen 是0表示非自动检测
   if (m3uCheckedNumbers.value >= unref(m3uData).length) {
-    debugger
     if (search.autoCheckQueen.length > 0 || search.autoSelfCheck) {
       unref(searchRef)?.changeSoso("auto check")
       return
@@ -266,9 +267,15 @@ async function checkM3u() {
   }
 
   checkProcess.value = true;
-  defaultCheck.startCheck()
+  let rule: Awaited<ReturnType<typeof getAIRule>> | null = null
+  try {
+    rule = await getAIRule()
+  } catch {
+    // 规则读取失败时仍继续检测，仅跳过硬编码分组
+  }
+  defaultCheck.startCheck(rule)
 
-  for (const [index, m3u8] of unref(m3uData).entries()) {
+  for (const m3u8 of unref(m3uData)) {
     if (!checkProcess.value) break
     //跳过已经检测过的源
     if (m3u8.success != undefined) {
@@ -287,6 +294,11 @@ async function checkM3u() {
       m3u8.rSpeed = res.speed + "ms"
       m3u8.ratio = res.width ? `${res.width}x${res.height}` : '未知'
       m3u8.fps = res.fps || 0
+      if (res.groups.length) {
+        applyExactGroups(m3u8, res.groups, res)
+      } else {
+        applyExactGroups(m3u8, [], res)
+      }
     }).catch(() => {
       // 只有检测状态才会更改结果
       if (checkProcess.value) {

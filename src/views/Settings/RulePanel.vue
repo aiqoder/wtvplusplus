@@ -33,12 +33,8 @@
         <main v-if="activeGroup" class="group-content">
           <div class="group-meta">
             <span class="field-label">分组名称</span>
-            <n-select
+            <n-input
               v-model:value="activeGroup.name"
-              filterable
-              tag
-              clearable
-              :options="nameOptions"
               placeholder="如 央视频道"
               class="group-name-input"
             />
@@ -67,7 +63,6 @@ import { getAIRule, getDefaultAIRule, hasCustomAIRule, resetAIRule, saveAIRule }
 import {
   createGroupEdit,
   editsToGroups,
-  groupOptionsFromConfig,
   groupsToEdits,
   parseChannelNames,
   type GroupEdit,
@@ -81,13 +76,6 @@ const keyword = ref('')
 const groups = ref<GroupEdit[]>([])
 const activeGroupId = ref<number | null>(null)
 const isCustom = ref(false)
-
-const nameOptions = computed(() =>
-  groupOptionsFromConfig({ groups: editsToGroups(groups.value) }).map((name) => ({
-    label: name,
-    value: name,
-  })),
-)
 
 const displayGroups = computed(() => {
   const kw = keyword.value.trim().toLowerCase()

@@ -16,6 +16,7 @@ var appIcon []byte
 
 func main() {
 	store := services.NewStoreService()
+	ai := services.NewAIService(store)
 	app := application.New(application.Options{
 		Name:        "wtv++",
 		Description: "wtv++",
@@ -23,8 +24,8 @@ func main() {
 		Services: []application.Service{
 			application.NewService(services.NewFileService()),
 			application.NewService(store),
-			application.NewService(services.NewAIService(store)),
-			application.NewService(services.NewPlaylistService()),
+			application.NewService(ai),
+			application.NewService(services.NewPlaylistService(ai)),
 			application.NewService(services.NewFFmpegService()),
 			application.NewService(services.NewClipboardService()),
 		},

@@ -102,11 +102,15 @@ async function classifyPendingItems(
       updated++
       const urls = String(item.url || '').split('#').filter(Boolean)
       for (const url of urls) {
-        void upsertPlaylistChannel({
-          name: item.name,
-          url,
-          group: item.group || '未知分组',
-        }).catch(() => {})
+        try {
+          await upsertPlaylistChannel({
+            name: item.name,
+            url,
+            group: item.group || '未知分组',
+          })
+        } catch {
+          // 单条写入失败不中断整批
+        }
       }
     }
 

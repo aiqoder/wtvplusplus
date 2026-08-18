@@ -49,10 +49,10 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { writeClipboard } from '@/api/native'
+import { getAIRule, selectAndWrite, writeClipboard, type RuleConfig } from '@/api/native'
 import { useSpeed } from '@/store/checkSpeed';
 import { getTvgLogoByName, message } from '@/utils/data';
-import { exportFile } from '@/utils/util';
+import { sortByAIRuleOrder, splitChannelGroups } from '@/utils/groupRuleSort'
 import { groupBy, map, uniqBy } from 'lodash';
 import { FormRules } from 'naive-ui';
 import { PropType } from 'vue';
@@ -87,16 +87,15 @@ const model = reactive<ModelType>({
   success: [1]
 })
 
-function exportM3u(_suffix: string, exportType: 'file' | 'clip' = 'file') {
-  function _to_M3u(jData: Record<string, any>) {
+async function exportM3u(_suffix: string, exportType: 'file' | 'clip' = 'file') {
+  function _to_M3u(jData: M3UObject[]) {
     const lines: string[] = [
       `#EXTM3U x-tvg-url=http://epg.51zmt.top:8000/cc.xml,http://epg.51zmt.top:8000/difang.xml`,
     ];
-    jData.forEach((item: { name: string; url: any, group: string }) => {
+    jData.forEach((item) => {
       const tvgId = getTvgLogoByName(item.name);
       if (tvgId) {
         lines.push(
-          // `#EXTINF:-1 tvg-logo="${logo}" tvg-id="${tvgId}" tvg-name="${tvgId}" ${model.isGroup ? 'group-title="' + item.group + '"' : ''},${item.name}\n${item.url}`
           `#EXTINF:-1 tvg-id="${tvgId}" tvg-name="${tvgId}" ${model.isGroup ? 'group-title="' + item.group + '"' : ''},${item.name}\n${item.url}`
         );
       } else {
@@ -106,80 +105,117 @@ function exportM3u(_suffix: string, exportType: 'file' | 'clip' = 'file') {
     return lines.join("\n");
   }
 
-  // 获取分组后的列表，方便导出txt
-  function getGroupArray(jData: Record<string, any>) {
+  // 按已排序数据的出现顺序建组，保证分组/节目顺序与 AI 规则一致
+  function getGroupArray(jData: M3UObject[]) {
     const groupObj: Record<string, M3UObject[]> = {}
-    jData.forEach((item: M3UObject) => {
-      if (!groupObj[item.group]) {
-        groupObj[item.group] = [];
+    const groupOrder: string[] = []
+    jData.forEach((item) => {
+      const group = item.group || '未知分组'
+      if (!groupObj[group]) {
+        groupObj[group] = []
+        groupOrder.push(group)
       }
-      groupObj[item.group].push(item)
+      groupObj[group].push(item)
     });
-    return groupObj
+    return { groupObj, groupOrder }
   }
 
-  function _to_Text(jData: Record<string, any>) {
+  function expandByGroups(items: M3UObject[]): M3UObject[] {
+    const out: M3UObject[] = []
+    for (const item of items) {
+      const groups = splitChannelGroups(item.group)
+      if (groups.length <= 1) {
+        out.push({ ...item, group: groups[0] || item.group || '未知分组' })
+        continue
+      }
+      for (const group of groups) {
+        out.push({ ...item, group })
+      }
+    }
+    return out
+  }
+
+  function _to_Text(jData: M3UObject[]) {
     const lines: string[] = [];
-    const groupM3u = getGroupArray(jData)
-    for (const [group, item] of Object.entries(groupM3u)) {
+    const { groupObj, groupOrder } = getGroupArray(jData)
+    for (const group of groupOrder) {
+      const item = groupObj[group]
       if (model.isGroup) {
         lines.push(lines.length == 0 ? `${group},#genre#` : `\n${group},#genre#`)
       }
-
       lines.push(...item.map(it => `${it.name},${it.url}`))
     }
-
     return lines.join("\n");
   }
 
-  function _to_Txt_Merge(jData: Record<string, any>[]) {
+  function _to_Txt_Merge(jData: M3UObject[]) {
     const lines: string[] = []
-    const groupM3u = getGroupArray(jData)
-    for (const [group, item] of Object.entries(groupM3u)) {
+    const { groupObj, groupOrder } = getGroupArray(jData)
+    for (const group of groupOrder) {
+      const item = groupObj[group]
       const dataGroupBy = groupBy(item, "name")
       if (model.isGroup) {
         lines.push(lines.length == 0 ? `${group},#genre#` : `\n${group},#genre#`)
       }
-
-      // 再次分组 分组中的链接
       for (const [name, arr] of Object.entries(dataGroupBy)) {
-        lines.push(`${name},${arr.map(item => item.url).join("#").replace(/[\n\r]/g, "")}`)
+        lines.push(`${name},${arr.map(it => it.url).join("#").replace(/[\n\r]/g, "")}`)
       }
     }
     return lines.join("\n")
   }
 
   const title = "wtv++_" + new Date().getTime() + `.${_suffix.replaceAll("-merge", "").replaceAll("-origin", "")}`;
-  function getExportFunc(type: "m3u" | "txt" | "txt-merge") {
-    const success = model.success.map(item => {
-      if (item === 1) return true
-      if (item === 0) return false
-      if (item === 2) return undefined
-    })
-    
-    const fixSpeed = (speed) => {
-      if(speed == "-1") return -1
-      if(isString(speed)) return Number(speed.replace("ms", ""))
-      return -1
-    }
-    const exportData = props.data.filter(item => model.pixs.includes(item.ratio as string))
-      .filter(item => success.includes(item.success)).filter(item => (model.speed > fixSpeed(item.rSpeed)))
-    debugger
-    if (type === "m3u") {
-      return _to_M3u(unref(exportData))
-    } else if (type === "txt") {
-      return _to_Text(unref(exportData))
-    } else if (type === "txt-merge") {
-      return _to_Txt_Merge(unref(exportData))
-    }
-    return ""
+
+  const success = model.success.map(item => {
+    if (item === 1) return true
+    if (item === 0) return false
+    if (item === 2) return undefined
+  })
+
+  const fixSpeed = (speed: unknown) => {
+    if (speed == "-1") return -1
+    if (isString(speed)) return Number(speed.replace("ms", ""))
+    return -1
+  }
+
+  let rule: RuleConfig | null = null
+  try {
+    rule = await getAIRule()
+  } catch {
+    // 规则读取失败时仍按名称/分组兜底排序
+  }
+
+  const filtered = props.data
+    .filter(item => model.pixs.includes(item.ratio as string))
+    .filter(item => success.includes(item.success))
+    .filter(item => model.speed > fixSpeed(item.rSpeed))
+  const exportData = sortByAIRuleOrder(
+    model.isGroup ? expandByGroups(filtered) : filtered,
+    rule,
+  )
+
+  const type = _suffix as "m3u" | "txt" | "txt-merge"
+  let content = ""
+  if (type === "m3u") {
+    content = _to_M3u(exportData)
+  } else if (type === "txt") {
+    content = _to_Text(exportData)
+  } else if (type === "txt-merge") {
+    content = _to_Txt_Merge(exportData)
   }
 
   if (exportType === 'clip') {
-     writeClipboard(getExportFunc(_suffix as "m3u" | "txt" | "txt-merge"))
+    await writeClipboard(content)
     message.success("文本已经成功复制到剪贴板")
-  } else {
-    exportFile(getExportFunc(_suffix as "m3u" | "txt" | "txt-merge"), title);
+    return
+  }
+
+  try {
+    const path = await selectAndWrite(title, content)
+    if (!path) return
+    message.success("导出成功")
+  } catch (e: any) {
+    message.error(e?.message || "导出失败")
   }
 }
 
@@ -188,7 +224,7 @@ function handleValidateButtonClick(e: MouseEvent) {
   e.preventDefault()
   formRef.value?.validate((errors) => {
     if (!errors) {
-      exportM3u(model.type)
+      void exportM3u(model.type)
     }
   })
 }
@@ -197,7 +233,7 @@ function handleValidateButtonClickClip(e: MouseEvent) {
   e.preventDefault()
   formRef.value?.validate((errors) => {
     if (!errors) {
-      exportM3u(model.type, "clip")
+      void exportM3u(model.type, "clip")
     }
   })
 }

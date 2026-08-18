@@ -115,7 +115,7 @@ export default function useM3uTable() {
                 title: "分组",
                 key: "group",
                 ellipsis: true,
-                width: 80,
+                width: 140,
                 render(row: Record<string, string>) {
                     return h('span',
                         {

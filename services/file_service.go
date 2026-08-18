@@ -4,6 +4,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"strings"
 	"unicode/utf8"
 
 	"github.com/wailsapp/wails/v3/pkg/application"
@@ -93,4 +94,37 @@ func (s *FileService) SelectAndRead() (map[string]string, error) {
 		return nil, err
 	}
 	return map[string]string{"path": path, "data": data}, nil
+}
+
+// SelectAndWrite opens a save-file dialog and writes data to the chosen path.
+// Returns the saved path, or "" when the user cancels.
+func (s *FileService) SelectAndWrite(filename, data string) (string, error) {
+	ext := strings.TrimPrefix(filepath.Ext(filename), ".")
+	if ext == "" {
+		ext = "txt"
+	}
+	filter := application.FileFilter{
+		DisplayName: strings.ToUpper(ext),
+		Pattern:     "*." + ext,
+	}
+	path, err := application.Get().Dialog.SaveFileWithOptions(&application.SaveFileDialogOptions{
+		Title:                "导出文件",
+		Filename:             filename,
+		CanCreateDirectories: true,
+		AllowOtherFileTypes:  true,
+		Filters:              []application.FileFilter{filter},
+	}).PromptForSingleSelection()
+	if err != nil {
+		return "", err
+	}
+	if path == "" {
+		return "", nil
+	}
+	if filepath.Ext(path) == "" {
+		path += "." + ext
+	}
+	if err := s.Write(path, data); err != nil {
+		return "", err
+	}
+	return path, nil
 }

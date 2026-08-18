@@ -13,6 +13,7 @@ type FFmpegService struct {
 	stream       *stream.Server
 	mu           sync.Mutex
 	cancel       context.CancelFunc
+	playbackID   uint64
 	probeCancels map[int]context.CancelFunc
 	nextProbeID  int
 }
@@ -37,14 +38,23 @@ func (s *FFmpegService) StartPlayback(url string) error {
 	if s.cancel != nil {
 		s.cancel()
 	}
+	s.playbackID++
+	id := s.playbackID
 	ctx, cancel := context.WithCancel(context.Background())
 	s.cancel = cancel
 	s.mu.Unlock()
-	err := ffmpeg.RemuxToFLV(ctx, url, s.stream)
-	s.mu.Lock()
-	s.cancel = nil
-	s.mu.Unlock()
-	return err
+
+	// Remux blocks for the life of a live stream; run async so StopPlayback
+	// can cancel without waiting for this binding call to return.
+	go func() {
+		_ = ffmpeg.RemuxToFLV(ctx, url, s.stream)
+		s.mu.Lock()
+		defer s.mu.Unlock()
+		if s.playbackID == id {
+			s.cancel = nil
+		}
+	}()
+	return nil
 }
 
 func (s *FFmpegService) StopPlayback() {

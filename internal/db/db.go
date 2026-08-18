@@ -36,6 +36,7 @@ func Open() (*gorm.DB, error) {
 		if err != nil {
 			return
 		}
+		_ = gdb.Exec("DROP INDEX IF EXISTS idx_playlist_channels_url").Error
 		err = gdb.AutoMigrate(&model.PlaylistChannel{})
 	})
 	return gdb, err

@@ -1,9 +1,11 @@
 package services
 
 import (
+	"sort"
 	"strings"
 
 	"wtv/internal/db"
+	"wtv/internal/grouprule"
 	"wtv/internal/model"
 )
 
@@ -29,10 +31,18 @@ type PlaylistGroup struct {
 	Items []PlaylistItem `json:"items"`
 }
 
-type PlaylistService struct{}
+type RematchResult struct {
+	Updated int `json:"updated"`
+	Unknown int `json:"unknown"`
+	Total   int `json:"total"`
+}
 
-func NewPlaylistService() *PlaylistService {
-	return &PlaylistService{}
+type PlaylistService struct {
+	ai *AIService
+}
+
+func NewPlaylistService(ai *AIService) *PlaylistService {
+	return &PlaylistService{ai: ai}
 }
 
 func (s *PlaylistService) Upsert(input PlaylistChannelInput) error {
@@ -48,11 +58,11 @@ func (s *PlaylistService) Upsert(input PlaylistChannelInput) error {
 		return nil
 	}
 	if group == "" {
-		group = "未知分组"
+		group = grouprule.UnknownGroup
 	}
 
 	var existing model.PlaylistChannel
-	tx := gdb.Where("url = ?", url).First(&existing)
+	tx := gdb.Where("url = ? AND channel_group = ?", url, group).First(&existing)
 	if tx.Error == nil {
 		existing.Name = name
 		existing.Group = group
@@ -84,7 +94,7 @@ func (s *PlaylistService) ListGrouped() ([]PlaylistGroup, error) {
 	}
 
 	var rows []model.PlaylistChannel
-	if err := gdb.Order("channel_group ASC, name ASC, id ASC").Find(&rows).Error; err != nil {
+	if err := gdb.Order("id ASC").Find(&rows).Error; err != nil {
 		return nil, err
 	}
 
@@ -114,6 +124,11 @@ func (s *PlaylistService) ListGrouped() ([]PlaylistGroup, error) {
 		}
 	}
 
+	idx := s.ruleIndex()
+	sort.SliceStable(groupOrder, func(i, j int) bool {
+		return idx.GroupLess(groupOrder[i], groupOrder[j])
+	})
+
 	result := make([]PlaylistGroup, 0, len(groupOrder))
 	for _, g := range groupOrder {
 		pg := PlaylistGroup{Group: g, Items: []PlaylistItem{}}
@@ -123,7 +138,50 @@ func (s *PlaylistService) ListGrouped() ([]PlaylistGroup, error) {
 			}
 			pg.Items = append(pg.Items, *merged[k])
 		}
+		sort.SliceStable(pg.Items, func(i, j int) bool {
+			return idx.ChannelLess(g, pg.Items[i].Name, pg.Items[j].Name)
+		})
 		result = append(result, pg)
+	}
+	return result, nil
+}
+
+// RematchByRule 按当前 AI 规则表本地回填分组，不调用 LLM。
+func (s *PlaylistService) RematchByRule() (RematchResult, error) {
+	gdb, err := db.Open()
+	if err != nil {
+		return RematchResult{}, err
+	}
+
+	var rows []model.PlaylistChannel
+	if err := gdb.Find(&rows).Error; err != nil {
+		return RematchResult{}, err
+	}
+
+	idx := s.ruleIndex()
+	result := RematchResult{Total: len(rows)}
+	tx := gdb.Begin()
+	if tx.Error != nil {
+		return RematchResult{}, tx.Error
+	}
+
+	for _, row := range rows {
+		next := idx.Rematch(row.Name, row.Group)
+		if next == grouprule.UnknownGroup {
+			result.Unknown++
+		}
+		if next == row.Group {
+			continue
+		}
+		if err := tx.Model(&model.PlaylistChannel{}).Where("id = ?", row.ID).Update("channel_group", next).Error; err != nil {
+			tx.Rollback()
+			return RematchResult{}, err
+		}
+		result.Updated++
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		return RematchResult{}, err
 	}
 	return result, nil
 }
@@ -134,6 +192,18 @@ func (s *PlaylistService) Clear() error {
 		return err
 	}
 	return gdb.Where("1 = 1").Delete(&model.PlaylistChannel{}).Error
+}
+
+func (s *PlaylistService) ruleIndex() grouprule.Index {
+	if s == nil || s.ai == nil {
+		return grouprule.Index{}
+	}
+	rule := s.ai.GetRule()
+	groups := make([]grouprule.Group, 0, len(rule.Groups))
+	for _, g := range rule.Groups {
+		groups = append(groups, grouprule.Group{Name: g.Name, Channels: g.Channels})
+	}
+	return grouprule.Build(groups)
 }
 
 func containsURL(joined, url string) bool {

@@ -6,8 +6,8 @@ import "time"
 type PlaylistChannel struct {
 	ID        uint      `gorm:"primaryKey" json:"id"`
 	Name      string    `gorm:"size:255;index;not null" json:"name"`
-	URL       string    `gorm:"size:2048;uniqueIndex;not null" json:"url"`
-	Group     string    `gorm:"column:channel_group;size:128;index;default:未知分组" json:"group"`
+	URL       string    `gorm:"size:2048;uniqueIndex:idx_playlist_url_group;not null" json:"url"`
+	Group     string    `gorm:"column:channel_group;size:128;uniqueIndex:idx_playlist_url_group;index;default:未知分组" json:"group"`
 	Width     int       `json:"width"`
 	Height    int       `json:"height"`
 	FPS       float64   `json:"fps"`

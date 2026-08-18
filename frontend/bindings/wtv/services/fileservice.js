@@ -40,6 +40,17 @@ export function SelectAndRead() {
 }
 
 /**
+ * SelectAndWrite opens a save-file dialog and writes data to the chosen path.
+ * Returns the saved path, or "" when the user cancels.
+ * @param {string} filename
+ * @param {string} data
+ * @returns {$CancellablePromise<string>}
+ */
+export function SelectAndWrite(filename, data) {
+    return $Call.ByID(4076382516, filename, data);
+}
+
+/**
  * @param {string} path
  * @param {string} data
  * @returns {$CancellablePromise<void>}

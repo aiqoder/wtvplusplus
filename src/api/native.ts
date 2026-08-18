@@ -121,6 +121,16 @@ export function listPlaylistGrouped(): Promise<PlaylistGroup[]> {
   return PlaylistService.ListGrouped()
 }
 
+export interface RematchResult {
+  updated: number
+  unknown: number
+  total: number
+}
+
+export function rematchPlaylistByRule(): Promise<RematchResult> {
+  return PlaylistService.RematchByRule()
+}
+
 export function clearPlaylist(): Promise<void> {
   return PlaylistService.Clear()
 }
@@ -135,6 +145,10 @@ export function selectAndRead(): Promise<{ path: string, data: string }> {
 
 export function writeFile(path: string, data: string): Promise<void> {
   return FileService.Write(path, data)
+}
+
+export function selectAndWrite(filename: string, data: string): Promise<string> {
+  return FileService.SelectAndWrite(filename, data)
 }
 
 export function readClipboard(): Promise<string> {

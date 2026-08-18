@@ -23,6 +23,7 @@ export {
     PlaylistChannelInput,
     PlaylistGroup,
     PlaylistItem,
+    RematchResult,
     RuleConfigDTO,
     RuleGroupDTO
 } from "./models.js";

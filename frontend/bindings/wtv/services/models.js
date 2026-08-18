@@ -255,6 +255,48 @@ export class PlaylistItem {
     }
 }
 
+export class RematchResult {
+    /**
+     * Creates a new RematchResult instance.
+     * @param {Partial<RematchResult>} [$$source = {}] - The source object to create the RematchResult.
+     */
+    constructor($$source = {}) {
+        if (!("updated" in $$source)) {
+            /**
+             * @member
+             * @type {number}
+             */
+            this["updated"] = 0;
+        }
+        if (!("unknown" in $$source)) {
+            /**
+             * @member
+             * @type {number}
+             */
+            this["unknown"] = 0;
+        }
+        if (!("total" in $$source)) {
+            /**
+             * @member
+             * @type {number}
+             */
+            this["total"] = 0;
+        }
+
+        Object.assign(this, $$source);
+    }
+
+    /**
+     * Creates a new RematchResult instance from a string or object.
+     * @param {any} [$$source = {}]
+     * @returns {RematchResult}
+     */
+    static createFrom($$source = {}) {
+        let $$parsedSource = typeof $$source === 'string' ? JSON.parse($$source) : $$source;
+        return new RematchResult(/** @type {Partial<RematchResult>} */($$parsedSource));
+    }
+}
+
 export class RuleConfigDTO {
     /**
      * Creates a new RuleConfigDTO instance.

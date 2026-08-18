@@ -89,10 +89,18 @@ int wtv_remux(const char *url, wtv_write_cb write_cb, uintptr_t user, int *cance
 	AVIOContext *avio = NULL;
 	wtv_io io = {write_cb, user};
 
-	if (avformat_open_input(&input, url, NULL, NULL) < 0) return -1;
+	/* interrupt must be set before open so HLS/HTTP nested I/O can abort */
+	input = avformat_alloc_context();
+	if (!input) return -1;
 	input->interrupt_callback.callback = interrupt_callback;
 	input->interrupt_callback.opaque = cancelled;
+	if (avformat_open_input(&input, url, NULL, NULL) < 0) {
+		/* On failure FFmpeg frees a user-supplied context. */
+		return -1;
+	}
+	if (*cancelled) goto fail;
 	if (avformat_find_stream_info(input, NULL) < 0) goto fail;
+	if (*cancelled) goto fail;
 	if (avformat_alloc_output_context2(&output, NULL, "mpegts", NULL) < 0 || !output) goto fail;
 
 	for (unsigned int i = 0; i < input->nb_streams; i++) {
@@ -138,6 +146,7 @@ int wtv_remux(const char *url, wtv_write_cb write_cb, uintptr_t user, int *cance
 		av_packet_unref(packet);
 	}
 	av_packet_free(&packet);
+	if (*cancelled) goto fail;
 	av_write_trailer(output);
 	avio_context_free(&avio);
 	avformat_free_context(output);

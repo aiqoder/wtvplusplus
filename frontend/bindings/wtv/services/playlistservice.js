@@ -27,6 +27,16 @@ export function ListGrouped() {
 }
 
 /**
+ * RematchByRule 按当前 AI 规则表本地回填分组，不调用 LLM。
+ * @returns {$CancellablePromise<$models.RematchResult>}
+ */
+export function RematchByRule() {
+    return $Call.ByID(4020443849).then(/** @type {($result: any) => any} */(($result) => {
+        return $$createType2($result);
+    }));
+}
+
+/**
  * @param {$models.PlaylistChannelInput} input
  * @returns {$CancellablePromise<void>}
  */
@@ -37,3 +47,4 @@ export function Upsert(input) {
 // Private type creation functions
 const $$createType0 = $models.PlaylistGroup.createFrom;
 const $$createType1 = $Create.Array($$createType0);
+const $$createType2 = $models.RematchResult.createFrom;
